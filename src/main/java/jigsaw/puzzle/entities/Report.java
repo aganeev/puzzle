@@ -8,7 +8,7 @@ public class Report {
     }
 
     public void addErrorLine(String line) {
-        text += "\n" + line;
+        text += text.isEmpty() ? line : "\n" + line;
     }
 
     public boolean isEmpty(){
