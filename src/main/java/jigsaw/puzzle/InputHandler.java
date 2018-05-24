@@ -9,8 +9,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 class InputHandler {
-    private InputHandler() {
-    }
 
     static Set<Piece> readFromFile(Report report, String file) {
 
@@ -21,9 +19,7 @@ class InputHandler {
         Piece newPiece;
         Set<Piece> retValue = new HashSet<>();
 
-        try {
-
-            BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF8"));
+        try(BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF8"));) {
             String line;
 
             while ((line = in.readLine()) != null) {
@@ -58,13 +54,13 @@ class InputHandler {
                     newPiece = new Piece(id, new int[]{up, right, bottom, left});
 
                     // checking if the edges are 0/1/-1
-                    if (!PieceEdgesAreValid(newPiece)) {
+                    if (!pieceEdgesAreValid(newPiece)) {
                         wrongElementsFormat.add(line);
                         validPiece = false;
                     }
 
                     // checking if the id of the piece isn't bigger than numElements
-                    if (!PieceIdIsValid(newPiece, puzzleSize)) {
+                    if (!pieceIdIsValid(newPiece, puzzleSize)) {
                         wrongElementsMsg += newPiece.getId() + ",";
                         validPiece = false;
                     }
@@ -87,14 +83,14 @@ class InputHandler {
         }
 
         // creating the report for the elements that aren't on the list
-        CheckMissingElements(report, retValue, puzzleSize);
-        CheckWrongElementsMsg(report, wrongElementsMsg, puzzleSize);
-        CheckWrongElementsFormat(report, wrongElementsFormat);
+        checkMissingElements(report, retValue, puzzleSize);
+        checkWrongElementsMsg(report, wrongElementsMsg, puzzleSize);
+        checkWrongElementsFormat(report, wrongElementsFormat);
 
         return retValue;
     }
 
-    static void CheckMissingElements(Report report, Set<Piece> set, int puzzleSize) {
+    private static void checkMissingElements(Report report, Set<Piece> set, int puzzleSize) {
         String[] array = new String[puzzleSize];
         for (int i = 0; i < puzzleSize; i++) {
             array[i] = (i + 1) + "";
@@ -122,7 +118,7 @@ class InputHandler {
         }
     }
 
-    static boolean PieceEdgesAreValid(Piece p) {
+    private static boolean pieceEdgesAreValid(Piece p) {
         if (p.getTop() > 1 ||  p.getTop() < -1) {
             return false;
         }
@@ -132,38 +128,30 @@ class InputHandler {
         if (p.getBottom() > 1 || p.getBottom() < -1) {
             return false;
         }
-        if (p.getLeft() > 1 || p.getLeft() < -1) {
-            return false;
-        }
-        return true;
+        return p.getLeft() <= 1 && p.getLeft() >= -1;
     }
 
-    static boolean PieceIdIsValid(Piece p, int puzzleSize) {
-        if (p.getId() > puzzleSize) {
-            return false;
-        }
-        return true;
+    private static boolean pieceIdIsValid(Piece p, int puzzleSize) {
+        return p.getId() <= puzzleSize;
     }
 
-    static Report CheckWrongElementsMsg(Report report, String wrongElementsMsg, int puzzleSize) {
+    private static void checkWrongElementsMsg(Report report, String wrongElementsMsg, int puzzleSize) {
         // creating the report for the elements are have ID bigger than numElements
-        if (wrongElementsMsg != "") {
+        if (!wrongElementsMsg.isEmpty()) {
             int msgSize = wrongElementsMsg.length() - 1;
             wrongElementsMsg = wrongElementsMsg.substring(0, msgSize);
             report.addErrorLine("Puzzle of size " +  puzzleSize + " cannot have the following ID(s): " + wrongElementsMsg);
             System.out.println("Puzzle of size " +  puzzleSize + " cannot have the following ID(s): " + wrongElementsMsg);
         }
-        return report;
     }
 
-    static Report CheckWrongElementsFormat(Report report, ArrayList<String> wrongElementsFormat) {
+    private static void checkWrongElementsFormat(Report report, ArrayList<String> wrongElementsFormat) {
         // creating arraylist of wrongElementsFormat error messages
-        if (wrongElementsFormat.size() != 0) {
+        if (!wrongElementsFormat.isEmpty()) {
             for (String msg: wrongElementsFormat) {
                 report.addErrorLine("Puzzle ID " + msg.charAt(0) + " has wrong data: " + msg);
                 System.out.println(("Puzzle ID " + msg.charAt(0) + " has wrong data: " + msg));
             }
         }
-        return report;
     }
 }
