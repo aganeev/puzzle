@@ -13,6 +13,9 @@ class PuzzleValidator {
     private Map<Integer,Piece> straightRightSet;
     private Map<Integer,Piece> straightBottomSet;
     private Map<Integer,Piece> straightLeftSet;
+    
+    private static final int X = 0;
+    private static final int Y = 1;
 
     PuzzleValidator(Report report, Set<Piece> pieces) {
         this.pieces = pieces;
@@ -89,38 +92,47 @@ class PuzzleValidator {
 
     private Collection<? extends int[]> findImpossibleRegularCases(Set<int[]> options) {
         return options.stream()
-            .filter(option->(option[0] != 1 && option[1] != 1))
+            .filter(option->(option[X] != 1 && option[Y] != 1))
             .filter(option1 -> !hasEnoughEdges(option1)).collect(Collectors.toSet());
     }
 
     private boolean hasEnoughEdges(int[] option) {
-        int xEdges = option[0];
-        int yEdges = option[1];
-        if (straightTopSet.size() < xEdges || straightBottomSet.size() < xEdges ||
-                straightRightSet.size() < yEdges || straightLeftSet.size() < yEdges) {
+        int xEdges = option[X];
+        int yEdges = option[Y];
+
+        if (straightTopSet.size() < xEdges || // if number of pieces with straight top side is less than required by X dimension of this option
+                straightBottomSet.size() < xEdges || // or number of pieces with straight bottom side is less than required by X dimension of this option
+                straightRightSet.size() < yEdges || // or number of pieces with straight right side is less than required by Y dimension of this option
+                straightLeftSet.size() < yEdges) // or number of pieces with straight left side is less than required by Y dimension of this option
+        {
             return false;
         }
+        // difference between expected and real straight horizontal edges (one piece may be counted twice if it have both top and bottom straight edges)
         int xDelta = (straightTopSet.size() + straightBottomSet.size()) - xEdges * 2;
+        // difference between expected and real straight vertical edges (one piece may be counted twice if it have both left and right straight edges)
         int yDelta = (straightRightSet.size() + straightLeftSet.size()) - yEdges * 2;
 
+        // number of pieces that have both top and bottom straight edges
         int xIntersect = (int) straightTopSet.keySet().stream()
                 .filter(straightBottomSet::containsKey)
                 .count();
 
+        // number of pieces that have both left and right straight edges
         int yIntersect = (int) straightLeftSet.keySet().stream()
                 .filter(straightRightSet::containsKey)
                 .count();
 
-        return xIntersect <= xDelta && yIntersect <= yDelta;
+        return (xIntersect <= xDelta) && (yIntersect <= yDelta);
     }
 
 
     private Set<int[]> findImpossibleOneLineCases(Set<int[]> options) {
+
         return options.stream()
-                .filter(option->(option[0] == 1 || option[1] == 1) && // filter only one line OR one column cases
-                    ((option[0] == 1 && option[1] != 1) && !hasEnoughEdgesForColumn()) || // one column cases
-                                ((option[0] != 1 && option[1] == 1) && !hasEnoughEdgesForLine()) || // one line cases
-                                ((option[0] == 1 && option[1] == 1) && !hasSquareOnePiece()) // one piece case
+                .filter(option->(option[X] == 1 || option[Y] == 1)) // leave only one line OR one column cases
+                .filter(option->((option[X] == 1 && option[Y] != 1) && !hasEnoughEdgesForColumn()) || // leave one column case if it doesn't pass straight edges validation
+                                ((option[X] != 1 && option[Y] == 1) && !hasEnoughEdgesForLine()) || // leave one line case if it doesn't pass straight edges validation
+                                ((option[X] == 1 && option[Y] == 1) && !hasSquareOnePiece()) // leave one piece case if it doesn't pass straight edges validation
                 ).collect(Collectors.toSet());
     }
 
@@ -133,26 +145,28 @@ class PuzzleValidator {
     }
 
     private boolean hasEnoughEdgesForLine() {
-        boolean areMoreThanOneWithStraightRightAndLeft = straightRightSet.size() >= 1 && straightLeftSet.size() >= 1;
         boolean isOnlyOnePieceWithStraightRight = straightRightSet.size() == 1;
         boolean isOnlyOnePieceWithStraightLeft = straightLeftSet.size() == 1;
         boolean isItSame = straightLeftSet.containsKey(straightRightSet.keySet().iterator().next());
 
-        boolean areAllPiecesWithStraightTop = pieces.stream().allMatch(piece -> straightTopSet.containsKey(piece.getId()));
-        boolean areAllPiecesWithStraightBottom = pieces.stream().allMatch(piece -> straightBottomSet.containsKey(piece.getId()));
+        boolean areMoreThanOneWithStraightRightAndLeft = straightRightSet.size() >= 1 && straightLeftSet.size() >= 1;
+
+        boolean areAllPiecesWithStraightTop = pieces.stream().allMatch(piece -> piece.getTop() == 0);
+        boolean areAllPiecesWithStraightBottom = pieces.stream().allMatch(piece -> piece.getBottom() == 0);
 
         return ((isOnlyOnePieceWithStraightLeft && isOnlyOnePieceWithStraightRight && !isItSame) || areMoreThanOneWithStraightRightAndLeft) &&
                 areAllPiecesWithStraightBottom && areAllPiecesWithStraightTop;
     }
 
     private boolean hasEnoughEdgesForColumn() {
-        boolean areMoreThanOneWithStraightTopAndBottom = straightTopSet.size() >= 1 && straightBottomSet.size() >= 1;
         boolean isOnlyOnePieceWithStraightTop = straightTopSet.size() == 1;
         boolean isOnlyOnePieceWithStraightBottom = straightBottomSet.size() == 1;
         boolean isItSame = straightTopSet.containsKey(straightBottomSet.keySet().iterator().next());
 
-        boolean areAllPiecesWithStraightLeft = pieces.stream().allMatch(piece -> straightLeftSet.containsKey(piece.getId()));
-        boolean areAllPiecesWithStraightRight = pieces.stream().allMatch(piece -> straightRightSet.containsKey(piece.getId()));
+        boolean areMoreThanOneWithStraightTopAndBottom = straightTopSet.size() >= 1 && straightBottomSet.size() >= 1;
+
+        boolean areAllPiecesWithStraightLeft = pieces.stream().allMatch(piece -> piece.getLeft() == 0);
+        boolean areAllPiecesWithStraightRight = pieces.stream().allMatch(piece -> piece.getRight() == 0);
 
         return ((isOnlyOnePieceWithStraightBottom && isOnlyOnePieceWithStraightTop && !isItSame) || areMoreThanOneWithStraightTopAndBottom) &&
                 areAllPiecesWithStraightRight && areAllPiecesWithStraightLeft;
