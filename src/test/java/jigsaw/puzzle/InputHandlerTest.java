@@ -6,6 +6,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+
+import java.io.File;
+import java.io.IOException;
 import java.util.Set;
 import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.*;
@@ -67,4 +70,15 @@ class InputHandlerTest {
         InputHandler.readFromFile(report, path);
         assertTrue(report.toString().contains("Error::File Not Found"));
     }
+
+    @Test
+    @DisplayName("Valid Input - not solving the puzzle")
+    public void validInputNoSolving() throws IOException {
+        String fileInput = "validInputNoSolving(1).txt";
+        String PATH = "C:\\Users\\od104b\\IdeaProjects\\puzzle\\src\\test\\resources\\";
+        String path = PATH + fileInput;
+        Report report = new Report();
+        assertTrue(report.toString().contains("Cannot solve puzzle"));
+    }
+
 }

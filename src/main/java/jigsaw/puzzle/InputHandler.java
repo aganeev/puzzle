@@ -107,7 +107,7 @@ class InputHandler {
 
         String missingElementsMsg = "";
         for (String str : array) {
-            if (str != "") {
+            if (!str.isEmpty()) {
                 missingElementsMsg += str + ",";
             }
 

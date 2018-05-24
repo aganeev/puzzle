@@ -3,6 +3,9 @@ package jigsaw.puzzle;
 import jigsaw.puzzle.entities.Piece;
 import jigsaw.puzzle.entities.Report;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Set;
@@ -15,9 +18,9 @@ public class PuzzleMain {
 
 
     public static void main(String[] args) {
-        String path = PATH + INPUT;
+        String inputPath = PATH + INPUT;
         Report report = new Report();
-        Set<Piece> pieces = InputHandler.readFromFile(report, path);
+        Set<Piece> pieces = InputHandler.readFromFile(report, inputPath);
 
         for (Piece p : pieces) {
             System.out.println(p.getId() + ": " + p.getTop() + " " + p.getRight() + " " + p.getBottom() + " " + p.getLeft());
@@ -38,7 +41,18 @@ public class PuzzleMain {
                 }
             }
         }
-      //  OutputHandler.reportToFile(report, outputFilePath);
+
+        String outputPath = PATH + OUTPUT;
+        try {
+            OutputHandler.reportToFile(report, outputPath);
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 }
