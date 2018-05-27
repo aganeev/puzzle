@@ -15,7 +15,7 @@ class OutputHandlerTest {
     @DisplayName("Valid Input - not solving the puzzle")
     public void validInputNoSolving() throws IOException {
         String fileInput = "validInputNoSolving(1).txt";
-        String PATH = "C:\\Users\\od104b\\IdeaProjects\\puzzle\\src\\test\\resources\\";
+        String PATH = "src/test/resources/";
         String path = PATH + fileInput;
         Report report = new Report();
         InputHandler.readFromFile(report, path);
@@ -30,7 +30,7 @@ class OutputHandlerTest {
     @DisplayName("invalid Input - missing pieces")
     public void invalidInputMissingPieces() throws IOException {
         String fileInput = "invalidInputMissingPieces(1).txt";
-        String PATH = "C:\\Users\\od104b\\IdeaProjects\\puzzle\\src\\test\\resources\\";
+        String PATH = "src/test/resources/";
         String path = PATH + fileInput;
         Report report = new Report();
         InputHandler.readFromFile(report, path);
@@ -45,7 +45,7 @@ class OutputHandlerTest {
     @DisplayName("invalid Input - wrong ID")
     public void invalidInputWrongID() throws IOException {
         String fileInput = "invalidInputWrongID(1).txt";
-        String PATH = "C:\\Users\\od104b\\IdeaProjects\\puzzle\\src\\test\\resources\\";
+        String PATH = "src/test/resources/";
         String path = PATH + fileInput;
         Report report = new Report();
         InputHandler.readFromFile(report, path);
@@ -60,7 +60,7 @@ class OutputHandlerTest {
     @DisplayName("invalid Input - wrong piece edges")
     public void invalidInputWrongPieceEdges() throws IOException {
         String fileInput = "invalidInputWrongPieceEdges(1).txt";
-        String PATH = "C:\\Users\\od104b\\IdeaProjects\\puzzle\\src\\test\\resources\\";
+        String PATH = "src/test/resources/";
         String path = PATH + fileInput;
         Report report = new Report();
         InputHandler.readFromFile(report, path);

@@ -15,8 +15,8 @@ public class Report {
         return text.isEmpty();
     }
 
-    public void setSucceedResult(String result) {
-        text = result;
+    public void setText(String text) {
+        this.text = text;
     }
 
     @Override
