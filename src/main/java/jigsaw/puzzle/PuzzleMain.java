@@ -60,7 +60,7 @@ public class PuzzleMain {
 
         }
 
-        OutputHandler.reportToFile(report, outputPath);
+		OutputHandler.reportToFile(report, outputPath);
     }
 
 }
