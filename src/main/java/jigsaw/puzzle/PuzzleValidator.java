@@ -141,7 +141,7 @@ class PuzzleValidator {
             Piece piece = pieces.iterator().next();
             return piece.getLeft() == 0 && piece.getBottom() == 0 && piece.getRight() == 0 && piece.getTop() == 0;
         }
-        return false;
+        return false; // Actually unreachable case
     }
 
     private boolean hasEnoughEdgesForLine() {
