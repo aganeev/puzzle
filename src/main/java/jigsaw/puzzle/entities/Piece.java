@@ -7,6 +7,7 @@ public class Piece {
     private int id;
     private int[] edges;
     private int sumOfEdges;
+    private boolean isUsed;
 
     private static final int TOP = 0;
     private static final int RIGHT = 1;
@@ -41,6 +42,14 @@ public class Piece {
 
     public int getSumOfEdges() {
         return sumOfEdges;
+    }
+
+    public boolean isUsed() {
+        return isUsed;
+    }
+
+    public void setUsed(boolean used) {
+        isUsed = used;
     }
 
     @Override

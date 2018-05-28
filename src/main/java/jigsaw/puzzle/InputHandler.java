@@ -19,7 +19,7 @@ class InputHandler {
         Piece newPiece;
         Set<Piece> retValue = new HashSet<>();
 
-        try(BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF8"));) {
+        try(BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF8"))) {
             String line;
 
             while ((line = in.readLine()) != null) {
