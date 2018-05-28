@@ -60,16 +60,7 @@ public class PuzzleMain {
 
         }
 
-        try {
-            OutputHandler.reportToFile(report, outputPath);
-        // TODO: Something with exceptions...
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+		OutputHandler.reportToFile(report, outputPath);
     }
 
 }
