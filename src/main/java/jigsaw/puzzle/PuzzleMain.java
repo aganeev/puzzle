@@ -43,16 +43,9 @@ public class PuzzleMain {
         }
 
         String outputPath = PATH + OUTPUT;
-        try {
-            OutputHandler.reportToFile(report, outputPath);
+        OutputHandler.reportToFile(report, outputPath);
 
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
     }
 
 }
