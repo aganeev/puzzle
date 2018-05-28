@@ -57,12 +57,12 @@ class PuzzleValidatorTest {
                         "Six pieces - four options"),
                 Arguments.of(
                         Stream.of(
-                                new Piece(1,new int[]{0,1,1,0}),
-                                new Piece(2,new int[]{0,1,-1,-1}),
-                                new Piece(3,new int[]{0,0,1,-1}),
-                                new Piece(4,new int[]{-1,1,0,0}),
-                                new Piece(5,new int[]{1,1,0,-1}),
-                                new Piece(6,new int[]{-1,0,0,-1})),
+                                new Piece(1,new int[]{0,0,1,1}),
+                                new Piece(2,new int[]{-1,0,1,-1}),
+                                new Piece(3,new int[]{-1,0,0,1}),
+                                new Piece(4,new int[]{0,-1,1,0}),
+                                new Piece(5,new int[]{-1,1,1,0}),
+                                new Piece(6,new int[]{-1,-1,0,0})),
                         Stream.of(
                                 new int[]{3,2}),
                         "Six pieces - one option"),
@@ -94,117 +94,121 @@ class PuzzleValidatorTest {
     private static Stream<Arguments> failedValidationData() {
         return Stream.of(
                 Arguments.of(
-                        Stream.of(new Piece(1, new int[]{0, 0, 1, 0})),
-                        "Cannot solve puzzle: wrong number of straight edges\n" +
-                                "Cannot solve puzzle: missing corner element: BR\n" +
-                                "Cannot solve puzzle: missing corner element: BL\n" +
-                                "Cannot solve puzzle: sum of edges is not zero",
+                        Stream.of(new Piece(1, new int[]{0, 0, 0, 1})),
+                        Arrays.asList(
+                                "Cannot solve puzzle: wrong number of straight edges",
+                                "Cannot solve puzzle: missing corner element: BR",
+                                "Cannot solve puzzle: missing corner element: BL",
+                                "Cannot solve puzzle: sum of edges is not zero"),
                         "One piece - all errors"),
                 Arguments.of(
                         Stream.of(
-                                new Piece(1,new int[]{0,1,0,0}),
-                                new Piece(2,new int[]{1,-1,0,-1}),
-                                new Piece(3,new int[]{0,0,0,1})),
-                        "Cannot solve puzzle: wrong number of straight edges\n" +
-                                "Cannot solve puzzle: sum of edges is not zero",
+                                new Piece(1,new int[]{0,0,1,0}),
+                                new Piece(2,new int[]{-1,1,-1,0}),
+                                new Piece(3,new int[]{1,0,0,0})),
+                        Arrays.asList(
+                                "Cannot solve puzzle: wrong number of straight edges",
+                                "Cannot solve puzzle: sum of edges is not zero"),
                         "Three pieces - 'straight edges' and 'sum of edges' errors"),
                 Arguments.of(
                         Stream.of(
-                                new Piece(1,new int[]{0,1,0,1}),
-                                new Piece(2,new int[]{0,0,0,-1}),
-                                new Piece(3,new int[]{0,0,0,-1})),
-                        "Cannot solve puzzle: wrong number of straight edges\n" +
-                                "Cannot solve puzzle: missing corner element: TL\n" +
-                                "Cannot solve puzzle: missing corner element: BL",
+                                new Piece(1,new int[]{1,0,1,0}),
+                                new Piece(2,new int[]{-1,0,0,0}),
+                                new Piece(3,new int[]{-1,0,0,0})),
+                        Arrays.asList(
+                                "Cannot solve puzzle: wrong number of straight edges",
+                                "Cannot solve puzzle: missing corner element: TL",
+                                "Cannot solve puzzle: missing corner element: BL"),
                         "Three pieces - 'straight edges' and 'corner elements' errors"),
                 Arguments.of(
                         Stream.of(
-                                new Piece(1,new int[]{0,1,0,0}),
-                                new Piece(2,new int[]{0,-1,0,1}),
-                                new Piece(3,new int[]{0,0,0,1})),
-                        "Cannot solve puzzle: sum of edges is not zero",
+                                new Piece(1,new int[]{0,0,1,0}),
+                                new Piece(2,new int[]{1,0,-1,0}),
+                                new Piece(3,new int[]{1,0,0,0})),
+                        Collections.singletonList("Cannot solve puzzle: sum of edges is not zero"),
                         "Three pieces - 'sum of edges' error"),
                 Arguments.of(
                         Stream.of(
-                                new Piece(1,new int[]{0,1,1,0}),
-                                new Piece(2,new int[]{0,-1,1,-1}),
-                                new Piece(3,new int[]{0,0,1,1}),
-                                new Piece(4,new int[]{-1,-1,0,0}),
-                                new Piece(5,new int[]{0,-1,1,-1}),
-                                new Piece(6,new int[]{-1,0,0,1})),
-                        "Cannot solve puzzle: wrong number of straight edges",
+                                new Piece(1,new int[]{0,0,1,1}),
+                                new Piece(2,new int[]{-1,0,-1,1}),
+                                new Piece(3,new int[]{1,0,0,1}),
+                                new Piece(4,new int[]{0,-1,-1,0}),
+                                new Piece(5,new int[]{-1,0,-1,1}),
+                                new Piece(6,new int[]{1,-1,0,0})),
+                        Collections.singletonList("Cannot solve puzzle: wrong number of straight edges"),
                         "Six pieces - 'straight edges' error"),
                 Arguments.of(
                         Stream.of(
-                                new Piece(1,new int[]{0,1,1,1}),
-                                new Piece(2,new int[]{0,-1,0,-1}),
-                                new Piece(3,new int[]{0,0,1,1}),
-                                new Piece(4,new int[]{-1,0,0,0}),
-                                new Piece(5,new int[]{-1,-1,0,0}),
-                                new Piece(6,new int[]{-1,0,0,1})),
-                        "Cannot solve puzzle: missing corner element: TL",
+                                new Piece(1,new int[]{1,0,1,1}),
+                                new Piece(2,new int[]{-1,0,-1,0}),
+                                new Piece(3,new int[]{1,0,0,1}),
+                                new Piece(4,new int[]{0,-1,0,0}),
+                                new Piece(5,new int[]{0,-1,-1,0}),
+                                new Piece(6,new int[]{1,-1,0,0})),
+                        Collections.singletonList("Cannot solve puzzle: missing corner element: TL"),
                         "Six pieces - 'corner elements TL' error"),
                 Arguments.of(
                         Stream.of(
-                                new Piece(1,new int[]{0,1,1,0}),
-                                new Piece(2,new int[]{0,-1,1,-1}),
-                                new Piece(3,new int[]{0,1,-1,1}),
-                                new Piece(4,new int[]{-1,1,0,0}),
-                                new Piece(5,new int[]{-1,0,0,-1}),
-                                new Piece(6,new int[]{-1,0,0,1})),
-                        "Cannot solve puzzle: missing corner element: TR",
+                                new Piece(1,new int[]{0,0,1,1}),
+                                new Piece(2,new int[]{-1,0,-1,1}),
+                                new Piece(3,new int[]{1,0,1,-1}),
+                                new Piece(4,new int[]{0,-1,1,0}),
+                                new Piece(5,new int[]{-1,-1,0,0}),
+                                new Piece(6,new int[]{1,-1,0,0})),
+                        Collections.singletonList("Cannot solve puzzle: missing corner element: TR"),
                         "Six pieces - 'corner elements TR' error"),
                 Arguments.of(
                         Stream.of(
-                                new Piece(1,new int[]{0,1,1,0}),
-                                new Piece(2,new int[]{0,0,1,-1}),
-                                new Piece(3,new int[]{0,0,-1,1}),
-                                new Piece(4,new int[]{-1,1,0,0}),
-                                new Piece(5,new int[]{-1,-1,0,-1}),
-                                new Piece(6,new int[]{-1,1,0,1})),
-                        "Cannot solve puzzle: missing corner element: BR",
+                                new Piece(1,new int[]{0,0,1,1}),
+                                new Piece(2,new int[]{-1,0,0,1}),
+                                new Piece(3,new int[]{1,0,0,-1}),
+                                new Piece(4,new int[]{0,-1,1,0}),
+                                new Piece(5,new int[]{-1,-1,-1,0}),
+                                new Piece(6,new int[]{1,-1,1,0})),
+                        Collections.singletonList("Cannot solve puzzle: missing corner element: BR"),
                         "Six pieces - 'corner elements BR' error"),
                 Arguments.of(
                         Stream.of(
-                                new Piece(1,new int[]{0,1,1,0}),
-                                new Piece(2,new int[]{0,-1,1,0}),
-                                new Piece(3,new int[]{0,0,1,1}),
-                                new Piece(4,new int[]{-1,1,0,-1}),
-                                new Piece(5,new int[]{-1,-1,0,-1}),
-                                new Piece(6,new int[]{-1,0,0,1})),
-                        "Cannot solve puzzle: missing corner element: BL",
+                                new Piece(1,new int[]{0,0,1,1}),
+                                new Piece(2,new int[]{0,0,-1,1}),
+                                new Piece(3,new int[]{1,0,0,1}),
+                                new Piece(4,new int[]{-1,-1,1,0}),
+                                new Piece(5,new int[]{-1,-1,-1,0}),
+                                new Piece(6,new int[]{1,-1,0,0})),
+                        Collections.singletonList("Cannot solve puzzle: missing corner element: BL"),
                         "Six pieces - 'corner elements BL' error"),
                 Arguments.of(
                         Stream.of(
-                                new Piece(1,new int[]{0,1,1,0}),
-                                new Piece(2,new int[]{0,0,1,-1}),
-                                new Piece(3,new int[]{0,0,1,1}),
-                                new Piece(4,new int[]{-1,1,0,0}),
-                                new Piece(5,new int[]{-1,-1,0,-1}),
-                                new Piece(6,new int[]{-1,0,0,1})),
-                        "Cannot solve puzzle: sum of edges is not zero",
+                                new Piece(1,new int[]{0,0,1,1}),
+                                new Piece(2,new int[]{-1,0,0,1}),
+                                new Piece(3,new int[]{1,0,0,1}),
+                                new Piece(4,new int[]{0,-1,1,0}),
+                                new Piece(5,new int[]{-1,-1,-1,0}),
+                                new Piece(6,new int[]{1,-1,0,0})),
+                        Collections.singletonList("Cannot solve puzzle: sum of edges is not zero"),
                         "Six pieces - 'sum of edges' error (=1)"),
                 Arguments.of(
                         Stream.of(
-                                new Piece(1,new int[]{0,1,1,0}),
-                                new Piece(2,new int[]{0,-1,1,-1}),
-                                new Piece(3,new int[]{0,0,0,1}),
-                                new Piece(4,new int[]{-1,1,0,0}),
-                                new Piece(5,new int[]{-1,-1,0,-1}),
-                                new Piece(6,new int[]{-1,0,0,1})),
-                        "Cannot solve puzzle: sum of edges is not zero",
+                                new Piece(1,new int[]{0,0,1,1}),
+                                new Piece(2,new int[]{-1,0,-1,1}),
+                                new Piece(3,new int[]{1,0,0,0}),
+                                new Piece(4,new int[]{0,-1,1,0}),
+                                new Piece(5,new int[]{-1,-1,-1,0}),
+                                new Piece(6,new int[]{1,-1,0,0})),
+                        Collections.singletonList("Cannot solve puzzle: sum of edges is not zero"),
                         "Six pieces - 'sum of edges' error (=-1)"),
                 Arguments.of(
                         Stream.of(
-                                new Piece(1,new int[]{0,1,1,0}),
-                                new Piece(2,new int[]{0,-1,1,-1}),
-                                new Piece(3,new int[]{0,0,1,1}),
-                                new Piece(4,new int[]{-1,1,0,0}),
-                                new Piece(5,new int[]{-1,-1,0,-1}),
-                                new Piece(6,new int[]{-1,1,0,1})),
-                        "Cannot solve puzzle: wrong number of straight edges\n" +
-                                "Cannot solve puzzle: missing corner element: BR\n" +
-                                "Cannot solve puzzle: sum of edges is not zero",
+                                new Piece(1,new int[]{0,0,1,1}),
+                                new Piece(2,new int[]{-1,0,-1,1}),
+                                new Piece(3,new int[]{1,0,0,1}),
+                                new Piece(4,new int[]{0,-1,1,0}),
+                                new Piece(5,new int[]{-1,-1,-1,0}),
+                                new Piece(6,new int[]{1,-1,1,0})),
+                        Arrays.asList(
+                                "Cannot solve puzzle: wrong number of straight edges",
+                                "Cannot solve puzzle: missing corner element: BR",
+                                "Cannot solve puzzle: sum of edges is not zero"),
                         "Six pieces - all errors")
                 );
     }
@@ -226,14 +230,14 @@ class PuzzleValidatorTest {
                         notFound),
                 () -> assertTrue(actualOptionsMap.isEmpty(), "not expected, but received options:" +
                         actualOptionsMap),
-                () -> assertTrue(report.isEmpty())
+                () -> assertTrue(!report.hasErrors())
 
         );
     }
 
     @ParameterizedTest(name = "{2}")
     @MethodSource("failedValidationData")
-    void getOptionsFailedValidationTest(Stream<Piece> piecesStream, String expectedError, String caseName) {
+    void getOptionsFailedValidationTest(Stream<Piece> piecesStream, List<String> expectedErrors, String caseName) {
         Set<Piece> pieces = createTestSet(piecesStream);
         Report report = new Report();
         PuzzleValidator puzzleValidator = new PuzzleValidator(report, pieces);
@@ -241,7 +245,7 @@ class PuzzleValidatorTest {
         assertAll(
                 () -> assertTrue(actualOptions.isEmpty(), "not expected, but received options:" +
                         actualOptions.stream().map(Arrays::toString).collect(Collectors.joining("  "))),
-                () -> assertEquals(expectedError, report.toString())
+                () -> assertEquals(expectedErrors, report.getErrors())
         );
     }
 

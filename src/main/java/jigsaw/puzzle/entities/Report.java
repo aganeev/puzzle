@@ -1,26 +1,37 @@
 package jigsaw.puzzle.entities;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Report {
-    private String text;
+    private List<String> errors;
+    private int[] solution = new int[0];
 
     public Report() {
-        this.text = "";
+        this.errors = new ArrayList<>();
     }
 
     public void addErrorLine(String line) {
-        text += text.isEmpty() ? line : "\n" + line;
+        errors.add(line);
     }
 
-    public boolean isEmpty(){
-        return text.isEmpty();
+    public boolean hasErrors(){
+        return !errors.isEmpty();
     }
 
-    public void setText(String text) {
-        this.text = text;
+    public boolean hasSolution(){
+        return solution.length > 0;
     }
 
-    @Override
-    public String toString() {
-        return text;
+    public void setSolution(int[] solution) {
+        this.solution = solution;
+    }
+
+    public List<String> getErrors() {
+        return errors;
+    }
+
+    public int[] getSolution() {
+        return solution;
     }
 }

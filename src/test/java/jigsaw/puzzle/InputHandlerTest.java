@@ -1,5 +1,4 @@
 package jigsaw.puzzle;
-import jigsaw.puzzle.entities.Piece;
 import jigsaw.puzzle.entities.Report;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
@@ -17,43 +16,48 @@ class InputHandlerTest {
     @ParameterizedTest
     @DisplayName("Invalid input - missing pieces")
     @MethodSource("invalidInputMissingPieces")
-    public void invalidInputMissingPieces(String input, String expectedResult) {
+    void invalidInputMissingPieces(String input, String expectedResult) {
         String PATH = "src/test/resources/";
         String path = PATH + input;
         Report report = new Report();
-        InputHandler.readFromFile(report, path);
-        assertEquals(expectedResult, report.toString());
+        InputHandler inputHandler = new InputHandler(report);
+        inputHandler.readFromFile(path);
+        assertEquals(1, report.getErrors().size());
+        assertEquals(expectedResult, report.getErrors().get(0));
     }
 
-    static Stream<Arguments> invalidInputMissingPieces() {
+    private static Stream<Arguments> invalidInputMissingPieces() {
         return Stream.of(Arguments.of("invalidInputMissingPieces(1).txt", "Missing puzzle element(s) with the following IDs: 11"),
                 Arguments.of("invalidInputMissingPieces(2).txt", "Missing puzzle element(s) with the following IDs: 8,11"));
     }
 
     @Test
     @DisplayName("Invalid input - wrong ID")
-    public void invalidInputWrongID() {
+    void invalidInputWrongID() {
         String INPUT = "invalidInputWrongID(1).txt";
         String PATH = "src/test/resources/";
         String path = PATH + INPUT;
         Report report = new Report();
-        InputHandler.readFromFile(report, path);
+        InputHandler inputHandler = new InputHandler(report);
+        inputHandler.readFromFile(path);
         String expectedErrorMessage = "Puzzle of size 12 cannot have the following ID(s): 13";
-        assertEquals(expectedErrorMessage, report.toString());
+        assertEquals(1, report.getErrors().size());
+        assertEquals(expectedErrorMessage, report.getErrors().get(0));
     }
 
     @ParameterizedTest
     @DisplayName("Invalid input - wrong piece edges")
     @MethodSource("invalidInputWrongPieceEdges")
-    public void invalidInputWrongPieceEdges(String input, String expectedResult) {
+    void invalidInputWrongPieceEdges(String input, String expectedResult) {
         String PATH = "src/test/resources/";
         String path = PATH + input;
         Report report = new Report();
-        InputHandler.readFromFile(report, path);
-        assertTrue(report.toString().contains(expectedResult));
+        InputHandler inputHandler = new InputHandler(report);
+        inputHandler.readFromFile(path);
+        assertTrue(report.getErrors().contains(expectedResult));
     }
 
-    static Stream<Arguments> invalidInputWrongPieceEdges() {
+    private static Stream<Arguments> invalidInputWrongPieceEdges() {
         return Stream.of(Arguments.of("invalidInputWrongPieceEdges(1).txt", "Puzzle ID 1 has wrong data: 11 1 0 -1 -1 1"),
                 Arguments.of("invalidInputWrongPieceEdges(2).txt", "Puzzle ID 6 has wrong data: 6 1 1 1"),
                 Arguments.of("invalidInputWrongPieceEdges(3).txt", "Puzzle ID 2 has wrong data: 2 1 0 -1 7"));
@@ -61,13 +65,14 @@ class InputHandlerTest {
 
     @Test
     @DisplayName("File not found exception")
-    public void fileNotFound(){
+    void fileNotFound(){
         String file = "";
         String PATH = "src/test/resources/";
         String path = PATH + file;
         Report report = new Report();
-        InputHandler.readFromFile(report, path);
-        assertTrue(report.toString().contains("Error::File Not Found"));
+        InputHandler inputHandler = new InputHandler(report);
+        inputHandler.readFromFile(path);
+        assertTrue(report.getErrors().contains("Error::File Not Found"));
     }
 
 
@@ -75,12 +80,12 @@ class InputHandlerTest {
     @Test
     @Disabled
     @DisplayName("Valid Input - not solving the puzzle")
-    public void validInputNoSolving() throws IOException {
+    void validInputNoSolving() throws IOException {
         String fileInput = "validInputNoSolving(1).txt";
         String PATH = "src/test/resources/";
         String path = PATH + fileInput;
         Report report = new Report();
-        assertTrue(report.toString().contains("Cannot solve puzzle"));
+        assertTrue(report.getErrors().contains("Cannot solve puzzle"));
     }
 
     /*****************************************************************

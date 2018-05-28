@@ -13,60 +13,68 @@ class OutputHandlerTest {
 
     @Test
     @DisplayName("Valid Input - not solving the puzzle")
-    public void validInputNoSolving() throws IOException {
+    void validInputNoSolving() throws IOException {
         String fileInput = "validInputNoSolving(1).txt";
         String PATH = "src/test/resources/";
         String path = PATH + fileInput;
         Report report = new Report();
-        InputHandler.readFromFile(report, path);
+        InputHandler inputHandler = new InputHandler(report);
+        inputHandler.readFromFile(path);
         String fileOutput = "output.txt";
         String pathOutput = PATH + fileOutput;
-        OutputHandler.reportToFile(report, pathOutput);
+        OutputHandler outputHandler = new OutputHandler(report);
+        outputHandler.reportToFile(pathOutput);
         File file = new File(pathOutput);
         assertTrue(file.exists());
     }
 
     @Test
     @DisplayName("invalid Input - missing pieces")
-    public void invalidInputMissingPieces() throws IOException {
+    void invalidInputMissingPieces() throws IOException {
         String fileInput = "invalidInputMissingPieces(1).txt";
         String PATH = "src/test/resources/";
         String path = PATH + fileInput;
         Report report = new Report();
-        InputHandler.readFromFile(report, path);
+        InputHandler inputHandler = new InputHandler(report);
+        inputHandler.readFromFile(path);
         String fileOutput = "output.txt";
         String pathOutput = PATH + fileOutput;
-        OutputHandler.reportToFile(report, pathOutput);
+        OutputHandler outputHandler = new OutputHandler(report);
+        outputHandler.reportToFile(pathOutput);
         File file = new File(pathOutput);
         assertTrue(file.exists());
     }
 
     @Test
     @DisplayName("invalid Input - wrong ID")
-    public void invalidInputWrongID() throws IOException {
+    void invalidInputWrongID() throws IOException {
         String fileInput = "invalidInputWrongID(1).txt";
         String PATH = "src/test/resources/";
         String path = PATH + fileInput;
         Report report = new Report();
-        InputHandler.readFromFile(report, path);
+        InputHandler inputHandler = new InputHandler(report);
+        inputHandler.readFromFile(path);
         String fileOutput = "output.txt";
         String pathOutput = PATH + fileOutput;
-        OutputHandler.reportToFile(report, pathOutput);
+        OutputHandler outputHandler = new OutputHandler(report);
+        outputHandler.reportToFile(pathOutput);
         File file = new File(pathOutput);
         assertTrue(file.exists());
     }
 
     @Test
     @DisplayName("invalid Input - wrong piece edges")
-    public void invalidInputWrongPieceEdges() throws IOException {
+    void invalidInputWrongPieceEdges() throws IOException {
         String fileInput = "invalidInputWrongPieceEdges(1).txt";
         String PATH = "src/test/resources/";
         String path = PATH + fileInput;
         Report report = new Report();
-        InputHandler.readFromFile(report, path);
+        InputHandler inputHandler = new InputHandler(report);
+        inputHandler.readFromFile(path);
         String fileOutput = "output.txt";
         String pathOutput = PATH + fileOutput;
-        OutputHandler.reportToFile(report, pathOutput);
+        OutputHandler outputHandler = new OutputHandler(report);
+        outputHandler.reportToFile(pathOutput);
         File file = new File(pathOutput);
         assertTrue(file.exists());
     }

@@ -9,10 +9,10 @@ public class Piece {
     private int sumOfEdges;
     private boolean isUsed;
 
-    private static final int TOP = 0;
-    private static final int RIGHT = 1;
-    private static final int BOTTOM = 2;
-    private static final int LEFT = 3;
+    private static final int LEFT = 0;
+    private static final int TOP = 1;
+    private static final int RIGHT = 2;
+    private static final int BOTTOM = 3;
 
     public Piece(int id, int[] edges) {
         this.id = id;
