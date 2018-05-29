@@ -43,6 +43,7 @@ class Solver {
                     return true;
                 } else {
                     piece.setUsed(false);
+                    board[currentPos[Y]][currentPos[X]] = null;
                 }
             }
         }
