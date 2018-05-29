@@ -8,7 +8,7 @@ import java.util.Set;
 public class PuzzleMain {
     public static void main(String[] args) {
         String inputPath = "src/test/resources/solvable2.txt"; //args[0];
-        String outputPath = "src/test/resources/output"; //args[1];
+        String outputPath = "target/output.txt"; //args[1];
 
         PuzzleMain puzzleMain = new PuzzleMain();
         puzzleMain.doWork(inputPath, outputPath);
