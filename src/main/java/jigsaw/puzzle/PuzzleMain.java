@@ -35,7 +35,9 @@ public class PuzzleMain {
             options.forEach(option-> System.out.println(Arrays.toString(option)));
             if (!report.hasErrors() && !options.isEmpty()) {
                 Solver solver = new Solver(report, pieces);
-                if (options.stream().peek(option-> System.out.println("Current being handled option: " + Arrays.toString(option))).noneMatch(solver::hasSolution)) {
+                if (options.stream()
+                        .peek(option-> System.out.println("Current being handled option: " + Arrays.toString(option)))
+                        .noneMatch(solver::hasSolution)) {
                     report.addErrorLine("Cannot solve puzzle: it seems that there is no proper solution");
                 }
             }

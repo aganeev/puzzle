@@ -1,0 +1,11 @@
+Release 1.0
+
+*Testing coverage*
+PuzzleValidator - Test coverage - 100%
+InputHandler 	- Test coverage - 94%
+OutputHandler 	- Test coverage - 48%
+PuzzleMain	 	- Test coverage - 0%
+Solver			- Test coverage - 0%
+
+*Functionality*
+For unresolvable puzzle size options starting from puzzles fith 6x6 size and more, time to deside that the option hasn't solution is too much. 
