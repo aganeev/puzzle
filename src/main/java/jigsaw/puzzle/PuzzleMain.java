@@ -5,10 +5,12 @@ import jigsaw.puzzle.entities.Report;
 
 import java.util.Arrays;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
+
+import static java.lang.Thread.sleep;
 
 public class PuzzleMain {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         long startTime = System.nanoTime();
         String inputPath = args[0];
         String outputPath = args[1];
@@ -17,12 +19,9 @@ public class PuzzleMain {
         puzzleMain.doWork(inputPath, outputPath);
         long estimatedTime = System.nanoTime() - startTime;
         System.out.println("Elapsed time: " + TimeUnit.NANOSECONDS.toSeconds(estimatedTime) + " seconds");
-
     }
 
-
-
-    private void doWork(String inputPath, String outputPath) {
+    private void doWork(String inputPath, String outputPath) throws InterruptedException {
         Report report = new Report();
         InputHandler inputHandler = new InputHandler(report);
         OutputHandler outputHandler = new OutputHandler(report);
@@ -35,15 +34,26 @@ public class PuzzleMain {
             options.forEach(option-> System.out.println(Arrays.toString(option)));
             if (!report.hasErrors() && !options.isEmpty()) {
                 Solver solver = new Solver(report, pieces);
-                if (options.stream()
-                        .peek(option-> System.out.println("Current being handled option: " + Arrays.toString(option)))
-                        .noneMatch(solver::hasSolution)) {
+                ForkJoinPool myPool = new ForkJoinPool(options.size());
+                options.forEach(option->myPool.execute(()-> {
+                    System.out.format("Current being handled option: %s by thread [%s]%n",Arrays.toString(option), Thread.currentThread().getName());
+                    solver.findMultiThreadedSolution(option);
+                }));
+
+                while (!report.hasSolution() && !myPool.isQuiescent()) {
+                    sleep(1000);
+                }
+                if (report.hasSolution()) {
+                    myPool.shutdownNow();
+                } else {
                     report.addErrorLine("Cannot solve puzzle: it seems that there is no proper solution");
                 }
+
             }
         }
         System.out.println("Done");
         outputHandler.reportToFile(outputPath);
+
     }
 
 }

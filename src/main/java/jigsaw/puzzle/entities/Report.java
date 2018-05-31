@@ -2,10 +2,12 @@ package jigsaw.puzzle.entities;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Report {
     private List<String> errors;
-    private int[] solution = new int[0];
+    private int[] solution = new int[]{};
+    private AtomicBoolean hasSolution = new AtomicBoolean(false);
 
     public Report() {
         this.errors = new ArrayList<>();
@@ -20,11 +22,13 @@ public class Report {
     }
 
     public boolean hasSolution(){
-        return solution.length > 0;
+        return hasSolution.get();
     }
 
     public void setSolution(int[] solution) {
-        this.solution = solution;
+        if (hasSolution.compareAndSet(false,true)) {
+            this.solution = solution;
+        }
     }
 
     public List<String> getErrors() {

@@ -3,8 +3,7 @@ package jigsaw.puzzle;
 import jigsaw.puzzle.entities.Piece;
 import jigsaw.puzzle.entities.Report;
 
-import java.util.Arrays;
-import java.util.Set;
+import java.util.*;
 
 class Solver {
     private int[] size;
@@ -18,15 +17,26 @@ class Solver {
 
 
     Solver(Report report, Set<Piece> pieces) {
-        this.pieces = pieces;
+        this.pieces = clonePieces(pieces);
         this.report = report;
     }
 
-    boolean hasSolution(int[] boardSize) {
+    private Set<Piece> clonePieces(Set<Piece> pieces) {
+        Set<Piece> retVal = new HashSet<>();
+        pieces.forEach(piece -> retVal.add(new Piece(piece)));
+        return retVal;
+    }
+
+    void findMultiThreadedSolution(int[] boardSize){
+        Solver solver = new Solver(report, pieces);
+        solver.findSolution(boardSize);
+    }
+
+    private void findSolution(int[] boardSize) {
         board = new Piece[boardSize[Y]][boardSize[X]];
         size = boardSize;
         lastPosition = new int[]{size[X] - 1, size[Y] - 1};
-        return isNextFound(new int[]{-1,0});
+        isNextFound(new int[]{-1,0});
     }
 
     private boolean isNextFound(int[] currentPos) {
@@ -36,7 +46,7 @@ class Solver {
         }
         currentPos = moveForward(currentPos);
         for (Piece piece : pieces) {
-            if ((!piece.isUsed()) && isMatchPiece(piece, currentPos)) {
+            if ((!piece.isUsed()) && isMatchWithNeighbors(piece, currentPos)) {
                 board[currentPos[Y]][currentPos[X]] = piece;
                 piece.setUsed(true);
                 if (isNextFound(currentPos)) {
@@ -71,7 +81,7 @@ class Solver {
         }
     }
 
-    private boolean isMatchPiece(Piece piece, int[] currentPos) {
+    private boolean isMatchWithNeighbors(Piece piece, int[] currentPos) {
         Piece left;
         Piece top;
         Piece right;
@@ -99,11 +109,10 @@ class Solver {
         } else {
             bottom = zero;
         }
-
-        return ((left.getRight() + piece.getLeft() == 0) &&
+        return (left.getRight() + piece.getLeft() == 0) &&
                 (top.getBottom() + piece.getTop() == 0) &&
                 (right == null || right.getLeft() + piece.getRight() == 0) &&
-                (bottom == null || bottom.getTop() + piece.getBottom() == 0));
+                (bottom == null || bottom.getTop() + piece.getBottom() == 0);
     }
 
 }

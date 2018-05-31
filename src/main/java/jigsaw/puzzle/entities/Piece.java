@@ -2,6 +2,7 @@ package jigsaw.puzzle.entities;
 
 import java.util.Objects;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class Piece {
     private int id;
@@ -18,6 +19,10 @@ public class Piece {
         this.id = id;
         this.edges = edges;
         this.sumOfEdges = IntStream.of(edges).sum();
+    }
+
+    public Piece(Piece piece){
+        this(piece.getId(), piece.edges);
     }
 
     public int getId() {
@@ -69,6 +74,5 @@ public class Piece {
     public int hashCode() {
         return Objects.hash(id);
     }
-
 
 }
