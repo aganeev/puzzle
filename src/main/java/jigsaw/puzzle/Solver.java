@@ -11,20 +11,16 @@ class Solver {
     private Set<Piece> pieces;
     private Report report;
     private int[] lastPosition;
+    private boolean[] usedPieces;
 
     private static final int X = 0;
     private static final int Y = 1;
 
 
     Solver(Report report, Set<Piece> pieces) {
-        this.pieces = clonePieces(pieces);
+        this.pieces = new HashSet<>(pieces);
         this.report = report;
-    }
-
-    private Set<Piece> clonePieces(Set<Piece> pieces) {
-        Set<Piece> retVal = new HashSet<>();
-        pieces.forEach(piece -> retVal.add(new Piece(piece)));
-        return retVal;
+        usedPieces = new boolean[pieces.size() + 1];
     }
 
     void findMultiThreadedSolution(int[] boardSize){
@@ -46,18 +42,27 @@ class Solver {
         }
         currentPos = moveForward(currentPos);
         for (Piece piece : pieces) {
-            if ((!piece.isUsed()) && isMatchWithNeighbors(piece, currentPos)) {
+            if ((!isUsed(piece)) && isMatchWithNeighbors(piece, currentPos)) {
                 board[currentPos[Y]][currentPos[X]] = piece;
-                piece.setUsed(true);
+                setUsed(piece, true);
                 if (isNextFound(currentPos)) {
                     return true;
                 } else {
-                    piece.setUsed(false);
+                    setUsed(piece, false);
                     board[currentPos[Y]][currentPos[X]] = null;
                 }
             }
         }
         return false;
+    }
+
+    private void setUsed(Piece piece, boolean isUsed) {
+        usedPieces[piece.getId()] = isUsed;
+    }
+
+
+    private boolean isUsed(Piece piece) {
+        return usedPieces[piece.getId()];
     }
 
     private void reportSolution() {

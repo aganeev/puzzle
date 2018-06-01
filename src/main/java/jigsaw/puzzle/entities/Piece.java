@@ -2,13 +2,11 @@ package jigsaw.puzzle.entities;
 
 import java.util.Objects;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 public class Piece {
     private int id;
     private int[] edges;
     private int sumOfEdges;
-    private boolean isUsed;
 
     private static final int LEFT = 0;
     private static final int TOP = 1;
@@ -19,10 +17,6 @@ public class Piece {
         this.id = id;
         this.edges = edges;
         this.sumOfEdges = IntStream.of(edges).sum();
-    }
-
-    public Piece(Piece piece){
-        this(piece.getId(), piece.edges);
     }
 
     public int getId() {
@@ -47,14 +41,6 @@ public class Piece {
 
     public int getSumOfEdges() {
         return sumOfEdges;
-    }
-
-    public boolean isUsed() {
-        return isUsed;
-    }
-
-    public void setUsed(boolean used) {
-        isUsed = used;
     }
 
     @Override

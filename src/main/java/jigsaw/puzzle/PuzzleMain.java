@@ -38,22 +38,32 @@ public class PuzzleMain {
                 options.forEach(option->myPool.execute(()-> {
                     System.out.format("Current being handled option: %s by thread [%s]%n",Arrays.toString(option), Thread.currentThread().getName());
                     solver.findMultiThreadedSolution(option);
+                    synchronizedNotify();
                 }));
-
-                while (!report.hasSolution() && !myPool.isQuiescent()) {
-                    sleep(1000);
-                }
-                if (report.hasSolution()) {
-                    myPool.shutdownNow();
-                } else {
-                    report.addErrorLine("Cannot solve puzzle: it seems that there is no proper solution");
-                }
-
+                handleResults(report, myPool);
             }
         }
         System.out.println("Done");
         outputHandler.reportToFile(outputPath);
 
+    }
+
+    private void handleResults(Report report, ForkJoinPool myPool) throws InterruptedException {
+        while (!report.hasSolution() && !myPool.isQuiescent()) {
+            synchronized (this) {
+                wait();
+            }
+            sleep(1000);
+        }
+        if (report.hasSolution()) {
+            myPool.shutdownNow();
+        } else {
+            report.addErrorLine("Cannot solve puzzle: it seems that there is no proper solution");
+        }
+    }
+
+    private synchronized void synchronizedNotify() {
+        notifyAll();
     }
 
 }
