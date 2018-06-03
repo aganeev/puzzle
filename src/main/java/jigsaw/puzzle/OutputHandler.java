@@ -31,11 +31,11 @@ class OutputHandler {
                 }
             }
         } catch (FileNotFoundException e) {
-            System.out.println("Error: File not found");
+            System.err.println("Error: Output file not found");
         } catch (UnsupportedEncodingException e) {
-            System.out.println("Error: Using unsupported encoding");
+            System.err.println("Error: Using unsupported encoding");
         } catch (IOException e) {
-            System.out.println("Error: IO exception");
+            System.err.println("Error: IO exception");
         }
     }
 

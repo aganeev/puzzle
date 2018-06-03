@@ -6,8 +6,7 @@ import jigsaw.puzzle.entities.Report;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.concurrent.*;
-
-import static java.lang.Thread.sleep;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class PuzzleMain {
     public static void main(String[] args) throws InterruptedException {
@@ -35,31 +34,28 @@ public class PuzzleMain {
             if (!report.hasErrors() && !options.isEmpty()) {
                 Solver solver = new Solver(report, pieces);
                 ForkJoinPool myPool = new ForkJoinPool(options.size());
+                AtomicInteger finishedCounter = new AtomicInteger(0);
                 options.forEach(option->myPool.execute(()-> {
                     System.out.format("Current being handled option: %s by thread [%s]%n",Arrays.toString(option), Thread.currentThread().getName());
                     solver.findMultiThreadedSolution(option);
+                    finishedCounter.incrementAndGet();
                     synchronizedNotify();
                 }));
-                handleResults(report, myPool);
+                while (!report.hasSolution() && finishedCounter.get() != options.size()) {
+                    synchronized (this) {
+                        wait();
+                    }
+                }
+                if (report.hasSolution()) {
+                    myPool.shutdownNow();
+                } else {
+                    report.addErrorLine("Cannot solve puzzle: it seems that there is no proper solution");
+                }
             }
         }
         System.out.println("Done");
         outputHandler.reportToFile(outputPath);
 
-    }
-
-    private void handleResults(Report report, ForkJoinPool myPool) throws InterruptedException {
-        while (!report.hasSolution() && !myPool.isQuiescent()) {
-            synchronized (this) {
-                wait();
-            }
-            sleep(1000);
-        }
-        if (report.hasSolution()) {
-            myPool.shutdownNow();
-        } else {
-            report.addErrorLine("Cannot solve puzzle: it seems that there is no proper solution");
-        }
     }
 
     private synchronized void synchronizedNotify() {

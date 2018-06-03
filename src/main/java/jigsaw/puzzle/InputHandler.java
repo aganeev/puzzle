@@ -80,12 +80,11 @@ class InputHandler {
                 ++actualLineCounter;
             }
         } catch (UnsupportedEncodingException e) {
-            report.addErrorLine("Error::Unsupported Encoding Exception");
+            report.addErrorLine("Error: Input file is using unsupported encoding");
         } catch (FileNotFoundException e) {
-            report.addErrorLine("Error::File Not Found");
-            System.out.println("Error::File Not Found");
+            report.addErrorLine("Error: Input file not found");
         } catch (IOException e) {
-            report.addErrorLine("Error:IOException");
+            report.addErrorLine("Error: IO exception");
         }
 
         // creating the report for the elements that aren't on the list
@@ -120,7 +119,6 @@ class InputHandler {
         if (missingElementsMsg.length() > 0) {
             missingElementsMsg = missingElementsMsg.substring(0, msgSize);
             report.addErrorLine("Missing puzzle element(s) with the following IDs: " + missingElementsMsg);
-            System.out.println("Missing puzzle element(s) with the following IDs: " + missingElementsMsg);
         }
     }
 
@@ -147,7 +145,6 @@ class InputHandler {
             int msgSize = wrongElementsMsg.length() - 1;
             wrongElementsMsg = wrongElementsMsg.substring(0, msgSize);
             report.addErrorLine("Puzzle of size " +  puzzleSize + " cannot have the following ID(s): " + wrongElementsMsg);
-            System.out.println("Puzzle of size " +  puzzleSize + " cannot have the following ID(s): " + wrongElementsMsg);
         }
     }
 
@@ -156,7 +153,6 @@ class InputHandler {
         if (!wrongElementsFormat.isEmpty()) {
             for (String msg: wrongElementsFormat) {
                 report.addErrorLine("Puzzle ID " + msg.charAt(0) + " has wrong data: " + msg);
-                System.out.println(("Puzzle ID " + msg.charAt(0) + " has wrong data: " + msg));
             }
         }
     }

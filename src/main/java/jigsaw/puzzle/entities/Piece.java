@@ -44,11 +44,6 @@ public class Piece {
     }
 
     @Override
-    public String toString() {
-        return String.valueOf(id);
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Piece)) return false;
