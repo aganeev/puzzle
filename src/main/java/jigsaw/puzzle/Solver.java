@@ -12,6 +12,7 @@ class Solver {
     private Set<Piece> pieces;
     private Report report;
     private int[] lastPosition;
+    private boolean[] puzzleUsingStatistic;
 
     private static final int X = 0;
     private static final int Y = 1;
@@ -20,6 +21,7 @@ class Solver {
     Solver(Report report, Set<Piece> pieces) {
         this.pieces = pieces;
         this.report = report;
+        puzzleUsingStatistic = new boolean[pieces.size()];
     }
 
     boolean hasSolution(int[] boardSize) {
@@ -36,18 +38,30 @@ class Solver {
         }
         currentPos = moveForward(currentPos);
         for (Piece piece : pieces) {
-            if ((!piece.isUsed()) && isMatchPiece(piece, currentPos)) {
+            int pieceId = piece.getId();
+            if (isUsed(pieceId)) {
+                continue;
+            }
+            if (isMatchPiece(piece, currentPos)) {
                 board[currentPos[Y]][currentPos[X]] = piece;
-                piece.setUsed(true);
+                setUsed(pieceId, true);
                 if (isNextFound(currentPos)) {
                     return true;
                 } else {
-                    piece.setUsed(false);
+                    setUsed(pieceId, false);
                     board[currentPos[Y]][currentPos[X]] = null;
                 }
             }
         }
         return false;
+    }
+
+    private boolean isUsed(int id) {
+        return puzzleUsingStatistic[id - 1];
+    }
+
+    private void setUsed(int id, boolean usingStatus) {
+        puzzleUsingStatistic[id -1] = usingStatus;
     }
 
     private void reportSolution() {

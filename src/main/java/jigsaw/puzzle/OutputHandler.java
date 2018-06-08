@@ -13,13 +13,11 @@ class OutputHandler {
 
     void reportToFile(String outputPath) {
 
-       // In case of file writing exceptions: print usage to the user with relevant info, but not the full stack trace.
+        // In case of file writing exceptions: print usage to the user with relevant info, but not the full stack trace.
         try (OutputStream outputFile = new FileOutputStream(outputPath);
              OutputStreamWriter out = new OutputStreamWriter(outputFile);
              BufferedWriter br = new BufferedWriter(out)) {
-            if (!report.hasSolution() && !report.hasErrors()) {
-                br.write("Error: Report is empty. Seems like this program do nothing...");
-            } else if (report.hasErrors()) {
+            if (report.hasErrors()) {
                 for (String error : report.getErrors()) {
                     br.write(error);
                     br.newLine();
@@ -31,11 +29,11 @@ class OutputHandler {
                 }
             }
         } catch (FileNotFoundException e) {
-            System.out.println("Error: File not found");
+            System.err.println("Error: Output file not found");
         } catch (UnsupportedEncodingException e) {
-            System.out.println("Error: Using unsupported encoding");
+            System.err.println("Error: Output file with unsupported encoding");
         } catch (IOException e) {
-            System.out.println("Error: IO exception");
+            System.err.println("Error: IO exception during output file writing");
         }
     }
 
