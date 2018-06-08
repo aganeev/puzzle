@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class SolverTest {
     private Set<Piece> pieceSet;
     private Report report;
-    private static final int[][] PIECE_SOURCE = new int[][]{
+    private static final int[][] SUCCESS_PIECE_SOURCE = new int[][]{
             {0,-1,1,0},
             {0,1,-1,0},
             {0,0,-1,-1},
@@ -26,7 +26,7 @@ class SolverTest {
             {-1,-1,0,0},
             {0,1,-1,1},
             {0,0,-1,0}};
-    private static final List<Integer> IDS = Arrays.asList(1,2,3,4,5,6,7,8,9,10,11,12);
+    private static final List<Integer> IDS = Arrays.asList(12,9,11,7,5,6,4,8,2,10,3,1);
 
     @BeforeEach
     void initTest() {
@@ -34,7 +34,7 @@ class SolverTest {
         Collections.shuffle(IDS);
         Iterator<Integer> idIterator = IDS.iterator();
         pieceSet = new HashSet<>();
-        for (int[] edges : PIECE_SOURCE) {
+        for (int[] edges : SUCCESS_PIECE_SOURCE) {
             pieceSet.add(new Piece(idIterator.next(),edges));
         }
     }
@@ -42,7 +42,7 @@ class SolverTest {
     @Test
     void solverTest4x3(){
         Solver solver = new Solver(report, pieceSet);
-        solver.findMultiThreadedSolution(new int[]{4,3});
+        solver.findSolution(new int[]{4,3});
         assertTrue(report.hasSolution());
         assertTrue(SolverValidator.isSolutionValid(pieceSet,report.getSolution()));
     }
@@ -50,11 +50,10 @@ class SolverTest {
     @Test
     void solverTest2x6(){
         Solver solver = new Solver(report, pieceSet);
-        solver.findMultiThreadedSolution(new int[]{2,6});
+        solver.findSolution(new int[]{2,6});
         assertTrue(report.hasSolution());
         assertTrue(SolverValidator.isSolutionValid(pieceSet,report.getSolution()));
     }
-
 
 }
 

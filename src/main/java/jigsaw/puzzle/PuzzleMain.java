@@ -6,11 +6,13 @@ import jigsaw.puzzle.entities.Report;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class PuzzleMain {
     public static void main(String[] args) throws InterruptedException {
         long startTime = System.nanoTime();
+        if (args.length < 2) {
+            System.err.println("Error: Not enough parameters are specified. Expected 2 (input file and output file)");
+        }
         String inputPath = args[0];
         String outputPath = args[1];
 
@@ -32,20 +34,16 @@ public class PuzzleMain {
             System.out.println("All side options:");
             options.forEach(option-> System.out.println(Arrays.toString(option)));
             if (!report.hasErrors() && !options.isEmpty()) {
-                Solver solver = new Solver(report, pieces);
                 ForkJoinPool myPool = new ForkJoinPool(options.size());
-                AtomicInteger finishedCounter = new AtomicInteger(0);
                 options.forEach(option->myPool.execute(()-> {
+                    Solver solver = new Solver(report, pieces);
                     System.out.format("Current being handled option: %s by thread [%s]%n",Arrays.toString(option), Thread.currentThread().getName());
-                    solver.findMultiThreadedSolution(option);
-                    finishedCounter.incrementAndGet();
+                    solver.findSolution(option);
                     synchronizedNotify();
                 }));
-                while (!report.hasSolution() && finishedCounter.get() != options.size()) {
-                    synchronized (this) {
-                        wait();
-                    }
-                }
+                myPool.shutdown();
+                synchronizedWait(report, myPool);
+
                 if (report.hasSolution()) {
                     myPool.shutdownNow();
                 } else {
@@ -56,6 +54,12 @@ public class PuzzleMain {
         System.out.println("Done");
         outputHandler.reportToFile(outputPath);
 
+    }
+
+    private synchronized void synchronizedWait(Report report, ForkJoinPool pool) throws InterruptedException {
+        do  {
+            wait(1000);
+        } while (!report.hasSolution() && !pool.isTerminated());
     }
 
     private synchronized void synchronizedNotify() {

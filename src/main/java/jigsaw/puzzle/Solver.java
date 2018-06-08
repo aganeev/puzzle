@@ -23,12 +23,7 @@ class Solver {
         usedPieces = new boolean[pieces.size() + 1];
     }
 
-    void findMultiThreadedSolution(int[] boardSize){
-        Solver solver = new Solver(report, pieces);
-        solver.findSolution(boardSize);
-    }
-
-    private void findSolution(int[] boardSize) {
+    void findSolution(int[] boardSize) {
         board = new Piece[boardSize[Y]][boardSize[X]];
         size = boardSize;
         lastPosition = new int[]{size[X] - 1, size[Y] - 1};

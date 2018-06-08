@@ -4,156 +4,146 @@ import jigsaw.puzzle.entities.Piece;
 import jigsaw.puzzle.entities.Report;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 class InputHandler {
     private Report report;
+    private int pieceSetSize = 0;
+    private Map<String,List<String>> errorMap;
+    private Set<Piece> pieceSet;
+    private boolean isPuzzleSizeParamErrorAlreadyAdded;
+
+    private static final String EQUALITY_SIGN = "=";
+    private static final String COMMENT_SIGN = "#";
+    private static final String PUZZLE_SIZE_PARAM_NAME = "NumElements";
 
     InputHandler(Report report) {
         this.report = report;
+        errorMap = new LinkedHashMap<>();
+        pieceSet = new HashSet<>();
     }
 
-    Set<Piece> readFromFile(String file) {
+    Set<Piece> readFromFile(String path) {
+        Path filePath = Paths.get(path);
+        if (!filePath.toFile().exists()) {
+            System.err.println("Error: Input file not found");
+        } else {
+            try (Stream<String> linesStream = Files.lines(filePath)) {
+                linesStream.map(String::trim)
+                        .filter(line -> !line.startsWith(COMMENT_SIGN))
+                        .filter(line -> !line.isEmpty())
+                        .forEach(line -> {
+                            if (line.contains(PUZZLE_SIZE_PARAM_NAME)) {
+                                updateSizeValue(line);
+                            } else if (pieceSetSize != 0) {
+                                handlePiece(line);
+                            } else {
+                                addWrongPuzzleSizeParamError();
+                            }
+                        });
+            } catch (IOException e) {
+                System.err.println("Error: IO exception during input file reading");
+            } finally {
+                collectErrors();
+            }
+        }
+        return pieceSet;
+    }
 
-        String wrongElementsMsg = "";
-        ArrayList<String> wrongElementsFormat = new ArrayList<>();
-        int puzzleSize = 0;
-        int actualLineCounter = 0;
-        Piece newPiece;
-        Set<Piece> retValue = new HashSet<>();
+    private void addWrongPuzzleSizeParamError() {
+        if (!isPuzzleSizeParamErrorAlreadyAdded) {
+            isPuzzleSizeParamErrorAlreadyAdded = true;
+            errorMap.put(String.format("Error: Parameter '%s' is not found",PUZZLE_SIZE_PARAM_NAME), null);
+        }
 
-        try(BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF8"))) {
-            String line;
+    }
 
-            while ((line = in.readLine()) != null) {
-                char firstLetter = ' ';
-                boolean validPiece = true;
-                line = line.trim();
-                if (line.length() != 0) {
-                    firstLetter = line.charAt(0);
+    private void collectErrors() {
+        if (pieceSetSize != 0) {
+            Set<Integer> idSet = pieceSet.stream().map(Piece::getId).collect(Collectors.toSet());
+            for (int i = 1; i <= pieceSetSize; i++) {
+                if (!idSet.contains(i)) {
+                    String error = "Missing puzzle element(s) with the following ID(s):";
+                    List<String> idList = errorMap.getOrDefault(error, new ArrayList<>());
+                    idList.add(String.valueOf(i));
+                    errorMap.put(error, idList);
                 }
-
-                char comment = '#';
-                if ( (line.length() == 0) || (firstLetter == comment)) {
-                    continue;
+            }
+        }
+        if (!errorMap.isEmpty()) {
+            pieceSet.clear();
+            errorMap.forEach((error,ids)->{
+                String finalError = error;
+                if (ids != null) {
+                    finalError += ids.stream().collect(Collectors.joining(", ", " ",""));
                 }
-                if (actualLineCounter == 0) {
-                    String[] pieceValues = line.split("=");
-                    puzzleSize = Integer.parseInt(pieceValues[1]);
+                report.addErrorLine(finalError);
+            });
+        }
+    }
+
+    private void handlePiece(String pieceLine) {
+        String[] splittedString = pieceLine.split("\\s+");
+        int id;
+        int[] edges = new int[4];
+        String idString = splittedString[0];
+        if (!idString.matches("\\d+")) {
+            errorMap.put(String.format("Wrong Puzzle ID value (%s). Expected: integer",idString), null);
+            return;
+        }
+        id = Integer.valueOf(idString);
+        if (id == 0) {
+            errorMap.put("Wrong Puzzle ID value. Cannot be 0", null);
+            return;
+        }
+        if (id > pieceSetSize) {
+            String error = String.format("Puzzle of size %s cannot have the following ID(s):",pieceSetSize);
+            List<String> idList = errorMap.getOrDefault(error, new ArrayList<>());
+            idList.add(idString);
+            errorMap.put(error, idList);
+            return;
+        }
+        if (splittedString.length != 5) {
+            errorMap.put(String.format("Puzzle ID %s has wrong data: %s",id, pieceLine), null);
+            return;
+        }
+        for (int i = 1; i < splittedString.length; i++) {
+            String edge = splittedString[i];
+            if (!edge.matches("(-?1)|(0)")) {
+                errorMap.put(String.format("Puzzle ID %s has wrong data: %s",idString, pieceLine), null);
+                return;
+            } else {
+                edges[i-1] = Integer.valueOf(edge);
+            }
+        }
+        if (!pieceSet.add(new Piece(id, edges))) {
+            errorMap.put(String.format("Puzzle ID %s has specified more than one time",idString), null);
+        }
+    }
+
+    private void updateSizeValue(String line) {
+        int indexOfEqualitySign = line.indexOf(EQUALITY_SIGN);
+        if (indexOfEqualitySign >= 0) {
+            String[] splittedString = line.split(EQUALITY_SIGN);
+            if (splittedString.length != 2 || !PUZZLE_SIZE_PARAM_NAME.equals(splittedString[0].trim())) {
+                errorMap.put(String.format("Wrong %s parameter format. Expected: %<s=<number>",PUZZLE_SIZE_PARAM_NAME), null);
+            } else {
+                String sizeValue = splittedString[1].trim();
+                if (!sizeValue.matches("\\d+")) {
+                    errorMap.put(String.format("Wrong %s parameter value (%s). Expected integer",PUZZLE_SIZE_PARAM_NAME, sizeValue), null);
                 } else {
-                    String[] pieceValues = line.split(" ");
-
-                    int id = Integer.parseInt(pieceValues[0]);
-
-                    // if there are less or more than 4 edges
-                    if (pieceValues.length !=5) {
-                        wrongElementsFormat.add(line);
-                        continue;
-                    }
-                    int left = Integer.parseInt(pieceValues[1]);
-                    int up = Integer.parseInt(pieceValues[2]);
-                    int right = Integer.parseInt(pieceValues[3]);
-                    int bottom = Integer.parseInt(pieceValues[4]);
-                    newPiece = new Piece(id, new int[]{left, up, right, bottom});
-
-                    // checking if the edges are 0/1/-1
-                    if (!pieceEdgesAreValid(newPiece)) {
-                        wrongElementsFormat.add(line);
-                        validPiece = false;
-                    }
-
-                    // checking if the id of the piece isn't bigger than numElements
-                    if (!pieceIdIsValid(newPiece, puzzleSize)) {
-                        wrongElementsMsg += newPiece.getId() + ",";
-                        validPiece = false;
-                    }
-
-                    if (validPiece) {
-                        retValue.add(newPiece);
-                    }
-
+                    pieceSetSize = Integer.valueOf(sizeValue);
                 }
-
-                ++actualLineCounter;
             }
-        } catch (UnsupportedEncodingException e) {
-            report.addErrorLine("Error: Input file is using unsupported encoding");
-        } catch (FileNotFoundException e) {
-            report.addErrorLine("Error: Input file not found");
-        } catch (IOException e) {
-            report.addErrorLine("Error: IO exception");
+        } else {
+            errorMap.put(String.format("Wrong %s parameter format. Expected: %<s=<number>",PUZZLE_SIZE_PARAM_NAME), null);
         }
-
-        // creating the report for the elements that aren't on the list
-        checkMissingElements(retValue, puzzleSize);
-        checkWrongElementsMsg(wrongElementsMsg, puzzleSize);
-        checkWrongElementsFormat(wrongElementsFormat);
-
-        return retValue;
+        isPuzzleSizeParamErrorAlreadyAdded = true;
     }
 
-    private void checkMissingElements(Set<Piece> set, int puzzleSize) {
-        String[] array = new String[puzzleSize];
-        for (int i = 0; i < puzzleSize; i++) {
-            array[i] = (i + 1) + "";
-        }
-
-
-        for (Piece p : set) {
-            array[p.getId() - 1] = "";
-        }
-
-        String missingElementsMsg = "";
-        for (String str : array) {
-            if (!str.isEmpty()) {
-                missingElementsMsg += str + ",";
-            }
-
-        }
-
-        // removing the last comma
-        int msgSize = missingElementsMsg.length() - 1;
-        if (missingElementsMsg.length() > 0) {
-            missingElementsMsg = missingElementsMsg.substring(0, msgSize);
-            report.addErrorLine("Missing puzzle element(s) with the following IDs: " + missingElementsMsg);
-        }
-    }
-
-    private boolean pieceEdgesAreValid(Piece p) {
-        if (p.getTop() > 1 ||  p.getTop() < -1) {
-            return false;
-        }
-        if (p.getRight() > 1 || p.getRight() < -1) {
-            return false;
-        }
-        if (p.getBottom() > 1 || p.getBottom() < -1) {
-            return false;
-        }
-        return p.getLeft() <= 1 && p.getLeft() >= -1;
-    }
-
-    private boolean pieceIdIsValid(Piece p, int puzzleSize) {
-        return p.getId() <= puzzleSize;
-    }
-
-    private void checkWrongElementsMsg(String wrongElementsMsg, int puzzleSize) {
-        // creating the report for the elements are have ID bigger than numElements
-        if (!wrongElementsMsg.isEmpty()) {
-            int msgSize = wrongElementsMsg.length() - 1;
-            wrongElementsMsg = wrongElementsMsg.substring(0, msgSize);
-            report.addErrorLine("Puzzle of size " +  puzzleSize + " cannot have the following ID(s): " + wrongElementsMsg);
-        }
-    }
-
-    private void checkWrongElementsFormat(ArrayList<String> wrongElementsFormat) {
-        // creating arraylist of wrongElementsFormat error messages
-        if (!wrongElementsFormat.isEmpty()) {
-            for (String msg: wrongElementsFormat) {
-                report.addErrorLine("Puzzle ID " + msg.charAt(0) + " has wrong data: " + msg);
-            }
-        }
-    }
 }

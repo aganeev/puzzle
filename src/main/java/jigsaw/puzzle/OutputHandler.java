@@ -17,9 +17,7 @@ class OutputHandler {
         try (OutputStream outputFile = new FileOutputStream(outputPath);
              OutputStreamWriter out = new OutputStreamWriter(outputFile);
              BufferedWriter br = new BufferedWriter(out)) {
-            if (!report.hasSolution() && !report.hasErrors()) {
-                br.write("Error: Report is empty. Seems like this program do nothing...");
-            } else if (report.hasErrors()) {
+            if (report.hasErrors()) {
                 for (String error : report.getErrors()) {
                     br.write(error);
                     br.newLine();
@@ -33,9 +31,9 @@ class OutputHandler {
         } catch (FileNotFoundException e) {
             System.err.println("Error: Output file not found");
         } catch (UnsupportedEncodingException e) {
-            System.err.println("Error: Using unsupported encoding");
+            System.err.println("Error: Output file with unsupported encoding");
         } catch (IOException e) {
-            System.err.println("Error: IO exception");
+            System.err.println("Error: IO exception during output file writing");
         }
     }
 

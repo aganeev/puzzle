@@ -52,7 +52,6 @@ class OutputHandlerTest {
     @Test
     void emptyReport(){
         outputHandler.reportToFile(OUTPUT_FILE_PATH);
-        assertEquals("Error: Report is empty. Seems like this program do nothing...", fileScanner.nextLine());
         assertFalse(fileScanner.hasNextLine());
         assertTrue(OUT_CONTENT.toString().isEmpty());
         assertTrue(ERR_CONTENT.toString().isEmpty());

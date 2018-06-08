@@ -1,4 +1,4 @@
-package jigsaw.puzzle;
+package utils;
 
 import jigsaw.puzzle.entities.Piece;
 import org.junit.jupiter.api.AfterAll;
