@@ -43,6 +43,10 @@ public class Piece {
         return sumOfEdges;
     }
 
+    public int[] getEdges() {
+        return edges;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

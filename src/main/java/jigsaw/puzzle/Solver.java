@@ -31,13 +31,17 @@ class Solver {
     }
 
     private boolean isNextFound(int[] currentPos) {
+        Set<String> localIndex = new HashSet<>();
         if (Arrays.equals(currentPos, lastPosition)) {
             reportSolution();
             return true;
         }
         currentPos = moveForward(currentPos);
         for (Piece piece : pieces) {
-            if ((!isUsed(piece)) && isMatchWithNeighbors(piece, currentPos)) {
+            if (localIndex.contains(Arrays.toString(piece.getEdges())) || isUsed(piece)) {
+                continue;
+            }
+            if (isMatchWithNeighbors(piece, currentPos)) {
                 board[currentPos[Y]][currentPos[X]] = piece;
                 setUsed(piece, true);
                 if (isNextFound(currentPos)) {
@@ -47,6 +51,7 @@ class Solver {
                     board[currentPos[Y]][currentPos[X]] = null;
                 }
             }
+            localIndex.add(Arrays.toString(piece.getEdges()));
         }
         return false;
     }

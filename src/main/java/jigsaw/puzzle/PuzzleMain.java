@@ -31,8 +31,6 @@ public class PuzzleMain {
         if (!report.hasErrors() && !pieces.isEmpty()) {
             PuzzleValidator puzzleValidator = new PuzzleValidator(report, pieces);
             Set<int[]> options = puzzleValidator.getOptions();
-            System.out.println("All side options:");
-            options.forEach(option-> System.out.println(Arrays.toString(option)));
             if (!report.hasErrors() && !options.isEmpty()) {
                 ForkJoinPool myPool = new ForkJoinPool(options.size());
                 options.forEach(option->myPool.execute(()-> {
@@ -43,10 +41,8 @@ public class PuzzleMain {
                 }));
                 myPool.shutdown();
                 synchronizedWait(report, myPool);
-
-                if (report.hasSolution()) {
-                    myPool.shutdownNow();
-                } else {
+                myPool.shutdownNow();
+                if (!report.hasSolution()) {
                     report.addErrorLine("Cannot solve puzzle: it seems that there is no proper solution");
                 }
             }
