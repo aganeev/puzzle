@@ -220,7 +220,7 @@ class PuzzleValidatorTest {
         Set<Piece> pieces = createTestSet(piecesStream);
         Report report = new Report();
         PuzzleValidator puzzleValidator = new PuzzleValidator(report, pieces);
-        Set<int[]> actualOptions = puzzleValidator.getOptions();
+        List<int[]> actualOptions = puzzleValidator.getOptions();
         Map<Integer, Integer> actualOptionsMap = actualOptions.stream().collect(Collectors.toMap(option -> option[0], option -> option[1], (a, b) -> b));
         Map<Integer, Integer> optionsMap = optionsStream.collect(Collectors.toSet()).stream().collect(Collectors.toMap(option -> option[0], option -> option[1], (a, b) -> b));
         Map<Integer,Integer> notFound = optionsMap.entrySet().stream().filter(option->!actualOptionsMap.remove(option.getKey(),option.getValue())).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
@@ -241,7 +241,7 @@ class PuzzleValidatorTest {
         Set<Piece> pieces = createTestSet(piecesStream);
         Report report = new Report();
         PuzzleValidator puzzleValidator = new PuzzleValidator(report, pieces);
-        Set<int[]> actualOptions = puzzleValidator.getOptions();
+        List<int[]> actualOptions = puzzleValidator.getOptions();
         assertAll(
                 () -> assertTrue(actualOptions.isEmpty(), "not expected, but received options:" +
                         actualOptions.stream().map(Arrays::toString).collect(Collectors.joining("  "))),

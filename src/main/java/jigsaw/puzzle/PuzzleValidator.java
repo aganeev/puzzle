@@ -44,11 +44,11 @@ class PuzzleValidator {
     }
 
 
-    Set<int[]> getOptions() {
+    List<int[]> getOptions() {
         defineStraightSets();
 
-        Set<int[]> options = findOptions();
-        Set<int[]> impossibleOptions = findImpossibleOneLineCases(options);
+        List<int[]> options = findOptions();
+        List<int[]> impossibleOptions = findImpossibleOneLineCases(options);
         impossibleOptions.addAll(findImpossibleRegularCases(options));
         options.removeAll(impossibleOptions);
         if (options.isEmpty()) {
@@ -63,6 +63,7 @@ class PuzzleValidator {
         }
         return options;
     }
+
 
     private boolean isEdgesSumCheckPassed() {
         return pieces.stream().mapToInt(Piece::getSumOfEdges).sum() == 0;
@@ -90,10 +91,10 @@ class PuzzleValidator {
         return isCheckPassed;
     }
 
-    private Collection<? extends int[]> findImpossibleRegularCases(Set<int[]> options) {
+    private List<int[]> findImpossibleRegularCases(List<int[]> options) {
         return options.stream()
             .filter(option->(option[X] != 1 && option[Y] != 1))
-            .filter(option1 -> !hasEnoughEdges(option1)).collect(Collectors.toSet());
+            .filter(option1 -> !hasEnoughEdges(option1)).collect(Collectors.toList());
     }
 
     private boolean hasEnoughEdges(int[] option) {
@@ -126,14 +127,14 @@ class PuzzleValidator {
     }
 
 
-    private Set<int[]> findImpossibleOneLineCases(Set<int[]> options) {
+    private List<int[]> findImpossibleOneLineCases(List<int[]> options) {
 
         return options.stream()
                 .filter(option->(option[X] == 1 || option[Y] == 1)) // leave only one line OR one column cases
                 .filter(option->((option[X] == 1 && option[Y] != 1) && !hasEnoughEdgesForColumn()) || // leave one column case if it doesn't pass straight edges validation
                                 ((option[X] != 1 && option[Y] == 1) && !hasEnoughEdgesForLine()) || // leave one line case if it doesn't pass straight edges validation
                                 ((option[X] == 1 && option[Y] == 1) && !hasSquareOnePiece()) // leave one piece case if it doesn't pass straight edges validation
-                ).collect(Collectors.toSet());
+                ).collect(Collectors.toList());
     }
 
     private boolean hasSquareOnePiece() {
@@ -173,12 +174,19 @@ class PuzzleValidator {
     }
 
 
-    private Set<int[]> findOptions() {
-        Set<int[]> options = new HashSet<>();
-        for (int i = 1; i <= pieces.size(); i++) {
+    private List<int[]> findOptions() {
+        List<int[]> options = new ArrayList<>();
+        for (int i = 1; i <= pieces.size()/i; i++) {
             if (pieces.size() % i == 0) {
-                options.add(new int[]{i, pieces.size()/i});
+                options.add(0,new int[]{i, pieces.size()/i});
             }
+        }
+        int lasIndex = options.size() - 1;
+        int[] lastOption = options.get(lasIndex);
+        int z = lastOption[0] == lastOption[1] ? lasIndex - 1 : lasIndex;
+        for (int i = 0; i <=z; i++) {
+            int[] option = options.get(i);
+            options.add(new int[]{option[1], option[0]});
         }
         return options;
     }

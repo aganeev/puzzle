@@ -4,6 +4,7 @@ import jigsaw.puzzle.entities.Piece;
 import jigsaw.puzzle.entities.Report;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.*;
 
@@ -31,7 +32,7 @@ public class PuzzleMain {
 
         if (!report.hasErrors() && !pieces.isEmpty()) {
             PuzzleValidator puzzleValidator = new PuzzleValidator(report, pieces);
-            Set<int[]> options = puzzleValidator.getOptions();
+            List<int[]> options = puzzleValidator.getOptions();
             if (!report.hasErrors() && !options.isEmpty()) {
                 ForkJoinPool myPool = new ForkJoinPool(options.size());
                 options.forEach(option->myPool.execute(()-> {
