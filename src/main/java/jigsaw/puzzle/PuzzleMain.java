@@ -12,6 +12,7 @@ public class PuzzleMain {
         long startTime = System.nanoTime();
         if (args.length < 2) {
             System.err.println("Error: Not enough parameters are specified. Expected 2 (input file and output file)");
+            System.exit(1);
         }
         String inputPath = args[0];
         String outputPath = args[1];
