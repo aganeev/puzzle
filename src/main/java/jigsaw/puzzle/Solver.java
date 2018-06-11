@@ -8,7 +8,7 @@ import java.util.*;
 class Solver {
     private int[] size;
     private Piece[][] board;
-    private Set<Piece> pieces;
+    private List<Piece> pieces;
     private Report report;
     private int[] lastPosition;
     private boolean[] usedPieces;
@@ -18,7 +18,8 @@ class Solver {
 
 
     Solver(Report report, Set<Piece> pieces) {
-        this.pieces = new HashSet<>(pieces);
+        this.pieces = new ArrayList<>(pieces);
+        Collections.shuffle(this.pieces);
         this.report = report;
         usedPieces = new boolean[pieces.size() + 1];
     }
