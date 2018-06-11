@@ -181,12 +181,12 @@ class PuzzleValidator {
                 options.add(0,new int[]{i, pieces.size()/i});
             }
         }
-        int lasIndex = options.size() - 1;
-        int[] lastOption = options.get(lasIndex);
-        int z = lastOption[0] == lastOption[1] ? lasIndex - 1 : lasIndex;
-        for (int i = 0; i <=z; i++) {
+        int size = options.size();
+        int[] firstOption = options.get(0);
+        int z = firstOption[0] == firstOption[1] ? 1 : 0;
+        for (int i = z; i <=(size -1 )*2; i+=2) {
             int[] option = options.get(i);
-            options.add(new int[]{option[1], option[0]});
+            options.add(i + 1,new int[]{option[1], option[0]});
         }
         return options;
     }
