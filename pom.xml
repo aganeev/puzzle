@@ -33,6 +33,12 @@
                         <artifactId>junit-vintage-engine</artifactId>
                         <version>${junit-vintage-engine}</version>
                     </dependency>
+                    <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
+                    <dependency>
+                        <groupId>com.google.code.gson</groupId>
+                        <artifactId>gson</artifactId>
+                        <version>2.8.5</version>
+                    </dependency>
                     <!-- JUnit 5 engine to run JUnit 5 tests -->
                     <dependency>
                         <groupId>org.junit.jupiter</groupId>
@@ -46,7 +52,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>jigsaw.puzzle.PuzzleMain</mainClass>
+                            <mainClass>jigsaw.puzzle.PuzzleMainServer</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
@@ -94,6 +100,11 @@
             <artifactId>junit</artifactId>
             <version>${junit.version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google</groupId>
+            <artifactId>google</artifactId>
+            <version>1</version>
         </dependency>
 
     </dependencies>
