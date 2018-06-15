@@ -1,5 +1,7 @@
 package jigsaw.puzzle;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import jigsaw.puzzle.entities.Report;
 
 import java.io.*;
@@ -48,5 +50,16 @@ class OutputHandler {
             returnValue[i] = line.toString();
         }
         return returnValue;
+    }
+
+    void reportJsonToSocket(PrintStream socketOutput) {
+        JsonArray errors = new JsonArray();
+        report.getErrors().forEach(errors::add);
+        JsonObject errorsElement = new JsonObject();
+        errorsElement.add("errors", errors);
+        JsonObject response = new JsonObject();
+        response.add("puzzleSolution", errorsElement);
+        socketOutput.print(response.getAsString());
+        socketOutput.flush();
     }
 }

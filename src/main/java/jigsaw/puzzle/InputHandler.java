@@ -1,7 +1,10 @@
 package jigsaw.puzzle;
 
+import com.google.gson.*;
 import jigsaw.puzzle.entities.Piece;
 import jigsaw.puzzle.entities.Report;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -11,8 +14,51 @@ import java.util.Set;
 class InputHandler {
     private Report report;
 
+    private Logger logger = LogManager.getLogger(InputHandler.class.getName());
+
     InputHandler(Report report) {
         this.report = report;
+    }
+
+    Set<Piece> readFromJson(String jsonString) {
+        JsonElement json = null;
+        Set<Piece> pieces = new HashSet<>();
+        try {
+            json = new JsonParser().parse(jsonString);
+        } catch (JsonParseException jEx) {
+            String error = "Received request is not a valid JSON";
+            logger.error(error);
+            report.addErrorLine(error);
+        }
+        if (json != null) {
+            JsonElement puzzle = json.getAsJsonObject().get("puzzle");
+            if (puzzle == null) {
+                String error = "json haven't puzzle object";
+                logger.error(error);
+                report.addErrorLine(error);
+            } else {
+                JsonElement piecesJson = puzzle.getAsJsonObject().get("pieces");
+                if (piecesJson == null) {
+                    String error = "json haven't pieces object";
+                    logger.error(error);
+                    report.addErrorLine(error);
+                } else {
+                    JsonArray piecesArray;
+                    try {
+                        piecesArray = piecesJson.getAsJsonArray();
+                        Gson gson = new Gson();
+                        piecesArray.forEach(jsonPiece-> pieces.add(gson.fromJson(jsonPiece,Piece.class)));
+                        logger.debug("Converting to pieces is done: {}", pieces);
+                    } catch (IllegalStateException ex) {
+                        String error = "Pieces object is not valid array";
+                        logger.error(error);
+                        report.addErrorLine(error);
+                    }
+
+                }
+            }
+        }
+        return pieces;
     }
 
     Set<Piece> readFromFile(String file) {

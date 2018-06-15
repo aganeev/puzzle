@@ -2,90 +2,86 @@ package jigsaw.puzzle;
 
 import jigsaw.puzzle.entities.Piece;
 import jigsaw.puzzle.entities.Report;
-import jigsaw.puzzle.entities.PieceSet;
 
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Arrays;
 import java.util.Set;
-import java.util.logging.Logger;
-import java.util.logging.Level;
-import com.google.gson.Gson;
+import java.util.concurrent.ForkJoinPool;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class PuzzleMainServer {
-    static Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
-    static ServerSocket server = null;
-    static Socket socket = null;
+    private Logger logger = LogManager.getLogger(PuzzleMainServer.class.getName());
 
 
     public static void main(String[] args) {
-
-        logger.setLevel(Level.INFO);
-
         PuzzleMainServer puzzleMainServer = new PuzzleMainServer();
+        puzzleMainServer.start(2, 7095);
+    }
 
-        long startTime = System.nanoTime();
-        String outputPath = "C:\\Users\\od104b\\IdeaProjects\\puzzle\\src\\test\\resources\\output.txt";
+    private void start(int numOfThreads, int port) {
 
-        try (ServerSocket listener = new ServerSocket(7095)) {
-
+        try (ServerSocket listener = new ServerSocket(port)) {
             logger.info("Server is up...");
-
-            Socket socket = listener.accept();
-            BufferedReader socketInput = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF8"));
-            PrintStream socketOutput = new PrintStream(socket.getOutputStream(), /*autoflush*/ true, "UTF8");
-            String line = "";
-
-            while (true) {
-                line = socketInput.readLine();
-                Gson gson = new Gson();
-                PieceSet pieces = gson.fromJson(line, PieceSet.class);
-                for (Piece p: pieces.getPiece()) {
-                    System.out.println(p.getId());
-                }
-
+            ForkJoinPool myPool = new ForkJoinPool(numOfThreads);
+            while (!listener.isClosed()) {
+                myPool.execute(()-> {
+                    try {
+                        handleRequest(listener.accept());
+                    } catch (IOException e) {
+                        logger.error("Got an IOException during request handling: {}", e);
+                    }
+                });
             }
-
-
-
         } catch (IOException e) {
-            logger.log(Level.SEVERE, "IOException error...");
+            logger.error("Got an IOException: {}", e);
         }
 
 
     }
 
-
-
-    /*    PuzzleMainServer puzzleMain = new PuzzleMainServer();
-        puzzleMain.doWork(inputPath, outputPath);
-        long estimatedTime = System.nanoTime() - startTime;
-        System.out.println("Elapsed time: " + TimeUnit.NANOSECONDS.toSeconds(estimatedTime) + " seconds"); */
-
-
-    private void doWork(String inputPath, String outputPath) {
+    private void handleRequest(Socket socket) throws IOException {
         Report report = new Report();
         InputHandler inputHandler = new InputHandler(report);
         OutputHandler outputHandler = new OutputHandler(report);
-        Set<Piece> pieces = inputHandler.readFromFile(inputPath);
-
-        if (!report.hasErrors() && !pieces.isEmpty()) {
-            PuzzleValidator puzzleValidator = new PuzzleValidator(report, pieces);
-            Set<int[]> options = puzzleValidator.getOptions();
-            System.out.println("All side options:");
-            options.forEach(option -> System.out.println(Arrays.toString(option)));
-            if (!report.hasErrors() && !options.isEmpty()) {
-                Solver solver = new Solver(report, pieces);
-                if (options.stream()
-                        .peek(option -> System.out.println("Current being handled option: " + Arrays.toString(option)))
-                        .noneMatch(solver::hasSolution)) {
-                    report.addErrorLine("Cannot solve puzzle: it seems that there is no proper solution");
+        try (BufferedReader socketInput = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF8"));
+        PrintStream socketOutput = new PrintStream(socket.getOutputStream(),true, "UTF8"))
+        {
+            String request = getStringRequestFromSocket(socketInput);
+            Set<Piece> pieces = inputHandler.readFromJson(request);
+            if (!report.hasErrors() && !pieces.isEmpty()) {
+                PuzzleValidator puzzleValidator = new PuzzleValidator(report, pieces);
+                Set<int[]> options = puzzleValidator.getOptions();
+                if (!report.hasErrors() && !options.isEmpty()) {
+                    Solver solver = new Solver(report, pieces);
+                    solvePuzzle(solver, options);
                 }
             }
+            outputHandler.reportJsonToSocket(socketOutput);
         }
-        System.out.println("Done");
-        outputHandler.reportToFile(outputPath);
+    }
+
+    private String getStringRequestFromSocket(BufferedReader socketInput) throws IOException {
+        StringBuilder request = new StringBuilder();
+        String line;
+        while ((line = socketInput.readLine()) != null && !line.equals("")) {
+            request.append(line);
+        }
+        return request.toString();
+    }
+
+
+    private void solvePuzzle(Solver solver, Set<int[]> options) {
+                if (options.stream()
+                        .peek(option -> logger.debug("Current being handled option: " + Arrays.toString(option)))
+                        .noneMatch(solver::findSolution)) {
+                    solver.getReport().addErrorLine("Cannot solve puzzle: it seems that there is no proper solution");
+                }
     }
 
 }
+
+

@@ -24,7 +24,7 @@ class Solver {
         puzzleUsingStatistic = new boolean[pieces.size()];
     }
 
-    boolean hasSolution(int[] boardSize) {
+    boolean findSolution(int[] boardSize) {
         board = new Piece[boardSize[Y]][boardSize[X]];
         size = boardSize;
         lastPosition = new int[]{size[X] - 1, size[Y] - 1};
@@ -120,4 +120,7 @@ class Solver {
                 (bottom == null || bottom.getTop() + piece.getBottom() == 0));
     }
 
+    Report getReport() {
+        return report;
+    }
 }
