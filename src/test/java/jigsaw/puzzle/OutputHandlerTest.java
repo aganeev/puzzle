@@ -6,10 +6,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -41,8 +38,11 @@ class OutputHandlerTest {
     }
 
     @BeforeEach
-    void initEachTest() throws FileNotFoundException {
+    void initEachTest() throws IOException {
         report = new Report();
+        if (!OUTPUT_FILE.exists()) {
+            OUTPUT_FILE.createNewFile();
+        }
         fileScanner = new Scanner(OUTPUT_FILE);
         outputHandler = new OutputHandler(report);
         OUT_CONTENT.reset();
@@ -105,13 +105,6 @@ class OutputHandlerTest {
         assertFalse(fileScanner.hasNextLine());
         assertTrue(OUT_CONTENT.toString().isEmpty());
         assertTrue(ERR_CONTENT.toString().isEmpty());
-    }
-
-    @Test
-    void fileNotFoundTest(){
-        outputHandler.reportToFile("notExistent/path");
-        assertTrue(OUT_CONTENT.toString().isEmpty());
-        assertEquals("Error: Output file not found", ERR_CONTENT.toString().trim());
     }
 
     private int[] generateRandomNumbers(int numbersInLine, int numberOfLines) {
