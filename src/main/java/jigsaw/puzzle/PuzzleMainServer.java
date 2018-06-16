@@ -6,37 +6,101 @@ import jigsaw.puzzle.entities.Report;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Arrays;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ForkJoinPool;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 
 public class PuzzleMainServer {
+
+    private static final String THREADS_PARAM_NAME = "threads";
+    private static final String THREADS_DEFAULT_VALUE = "4";
+    private static final String PORT_PARAM_NAME = "port";
+    private static final String PORT_DEFAULT_VALUE = "7095";
+
     private static final Logger logger = LogManager.getLogger(PuzzleMainServer.class.getName());
 
-
     public static void main(String[] args) {
+        Map<String,String> params = parseArgs(args);
+        int numOfThreads = validateNumOfThreads(params.getOrDefault(THREADS_PARAM_NAME,THREADS_DEFAULT_VALUE));
+        int port = validatePort(params.getOrDefault(PORT_PARAM_NAME,PORT_DEFAULT_VALUE));
         PuzzleMainServer puzzleMainServer = new PuzzleMainServer();
-        puzzleMainServer.start(2, 7095);
+        puzzleMainServer.start(numOfThreads, port);
+    }
+
+    private static int validatePort(String value) {
+        String error = String.format("The port is wrong (%s), only ports in range 1024–49151 are available",value);
+        if (!value.matches("\\d+")) {
+            exitWithError(error);
+        }
+        int intValue = Integer.parseInt(value);
+        if  (intValue < 1024 || intValue > 49151) {
+            exitWithError(error);
+        }
+        return intValue;
+    }
+
+    private static int validateNumOfThreads(String value) {
+        String error = String.format("The number of threads is wrong (%s), can be only positive integer less than 10",value);
+        if (!value.matches("\\d+")) {
+            exitWithError(error);
+        }
+        int intValue = Integer.parseInt(value);
+        if  (intValue > 10) {
+            exitWithError(error);
+        }
+        return intValue;
+    }
+
+    private static Map<String,String> parseArgs(String[] args) {
+        Map<String,String> parsedArgs = new HashMap<>();
+        for (int i = 0; i < args.length; i++) {
+            String param = args[i];
+            if (param.matches("-[a-zA-Z]+")) {
+                parsedArgs.put(param.substring(1),args[++i]);
+            }
+        }
+        return parsedArgs;
     }
 
     private void start(int numOfThreads, int port) {
-
         try (ServerSocket listener = new ServerSocket(port)) {
-            logger.info("Server is up...");
+            logger.info("Server is up on port={} and number of threads={}.",port,numOfThreads);
             ForkJoinPool myPool = new ForkJoinPool(numOfThreads);
             while (!listener.isClosed()) {
                 Socket socket = listener.accept();
-                myPool.execute(()-> {
+                String sessionId = UUID.randomUUID().toString();
+                ThreadContext.push(sessionId);
+                logger.debug("Request received. Generated session id {}",sessionId);
+                BufferedReader socketInput = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF8"));
+                PrintStream socketOutput = new PrintStream(socket.getOutputStream(), true, "UTF8");
+                String request = socketInput.readLine();
+                logger.debug("Received request: {}", request);
+                Report report = new Report();
+                InputHandler inputHandler = new InputHandler(report);
+                Set<Piece> pieces = inputHandler.readFromJson(request);
+                String immediatelyResponse = String.format("{\"puzzleReceived\":{\"sessionId\":\"%s\",\"numPieces\":%s}}",sessionId,pieces.size());
+                socketOutput.println(immediatelyResponse);
+                logger.debug("Sending first response: {}", immediatelyResponse);
+                socketOutput.flush();
+                myPool.execute(() -> {
                     try {
-                        handleRequest(socket);
+                        ThreadContext.push(sessionId);
+                        handleRequest(socketOutput, pieces, report);
+                        socketInput.close();
+                        socketOutput.close();
+                        socket.close();
                     } catch (IOException e) {
                         logger.error("Got an IOException during request handling: {}", e);
+                    } finally {
+                        ThreadContext.pop();
                     }
                 });
+                ThreadContext.pop();
             }
+
         } catch (IOException e) {
             logger.error("Got an IOException: {}", e);
         }
@@ -44,39 +108,19 @@ public class PuzzleMainServer {
 
     }
 
-    private void handleRequest(Socket socket) throws IOException {
-        Report report = new Report();
-        InputHandler inputHandler = new InputHandler(report);
-        OutputHandler outputHandler = new OutputHandler(report);
-        try (BufferedReader socketInput = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF8"));
-        PrintStream socketOutput = new PrintStream(socket.getOutputStream(),true, "UTF8"))
-        {
-            String request = socketInput.readLine();
-            logger.debug(request);
-            Set<Piece> pieces = inputHandler.readFromJson(request);
-            if (!report.hasErrors() && !pieces.isEmpty()) {
-                PuzzleValidator puzzleValidator = new PuzzleValidator(report, pieces);
-                Set<int[]> options = puzzleValidator.getOptions();
-                if (!report.hasErrors() && !options.isEmpty()) {
-                    Solver solver = new Solver(report, pieces);
-                    solvePuzzle(solver, options);
-                }
+
+    private void handleRequest(PrintStream socketOutput, Set<Piece> pieces, Report report) {
+        if (!report.hasErrors() && !pieces.isEmpty()) {
+            PuzzleValidator puzzleValidator = new PuzzleValidator(report, pieces);
+            Set<int[]> options = puzzleValidator.getOptions();
+            if (!report.hasErrors() && !options.isEmpty()) {
+                Solver solver = new Solver(report, pieces);
+                solvePuzzle(solver, options);
             }
-            outputHandler.reportJsonToSocket(socketOutput);
-        } finally {
-            socket.close();
         }
+        OutputHandler outputHandler = new OutputHandler(report);
+        outputHandler.reportJsonToSocket(socketOutput);
     }
-
-    private String getStringRequestFromSocket(BufferedReader socketInput) throws IOException {
-        StringBuilder request = new StringBuilder();
-        String line;
-        while ((line = socketInput.readLine()) != null && !line.equals("")) {
-            request.append(line);
-        }
-        return request.toString();
-    }
-
 
     private void solvePuzzle(Solver solver, Set<int[]> options) {
         options.stream()
@@ -85,6 +129,10 @@ public class PuzzleMainServer {
                 .findFirst();
     }
 
+    private static void exitWithError(String error) {
+        logger.fatal(error);
+        System.exit(1);
+    }
 }
 
 

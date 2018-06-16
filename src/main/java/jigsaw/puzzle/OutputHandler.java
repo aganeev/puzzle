@@ -1,14 +1,18 @@
 package jigsaw.puzzle;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import jigsaw.puzzle.entities.Report;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.*;
-import java.util.List;
 
 class OutputHandler {
     private Report report;
+
+    private static final Logger logger = LogManager.getLogger(OutputHandler.class.getName());
 
     OutputHandler(Report report) {
         this.report = report;
@@ -33,11 +37,11 @@ class OutputHandler {
                 br.write("Cannot solve puzzle: it seems that there is no proper solution");
             }
         } catch (FileNotFoundException e) {
-            System.err.println("Error: Output file not found");
+            logger.error("Output file not found");
         } catch (UnsupportedEncodingException e) {
-            System.err.println("Error: Output file with unsupported encoding");
+            logger.error("Output file with unsupported encoding");
         } catch (IOException e) {
-            System.err.println("Error: IO exception during output file writing");
+            logger.error("IO exception during output file writing");
         }
     }
 
@@ -58,20 +62,24 @@ class OutputHandler {
     }
 
     void reportJsonToSocket(PrintStream socketOutput) {
-        String response;
-            if (report.hasErrors()) {
-                response = createErrorJson();
-            } else if (report.hasSolution()) {
-                response = createSolutionJson();
-            } else {
-                response = "{\"PuzzleSolution\": {\"SolutionExists\": false}}";
-            }
-        socketOutput.print(response);
+        JsonObject puzzleSolution = new JsonObject();
+        boolean isSolutionExist = false;
+        if (report.hasErrors()) {
+            puzzleSolution.add("errors", createErrorJson());
+        } else if (report.hasSolution()) {
+            isSolutionExist = true;
+            puzzleSolution.add("solution", createSolutionJson());
+        }
+        puzzleSolution.addProperty("solutionExist",isSolutionExist);
+        JsonObject response = new JsonObject();
+        response.add("puzzleSolution", puzzleSolution);
+        logger.debug("Sending final response: {}", response);
+        socketOutput.print(response.toString());
         socketOutput.flush();
         socketOutput.close();
     }
 
-    private String createSolutionJson() {
+    private JsonElement createSolutionJson() {
         JsonArray solutionPiecesJson = new JsonArray();
         int[] solution = report.getSolution();
         for (int i = 1; i < solution.length; i++) {
@@ -80,19 +88,13 @@ class OutputHandler {
         JsonObject solutionJson = new JsonObject();
         solutionJson.add("solutionPieces", solutionPiecesJson);
         solutionJson.addProperty("rows", solution[0]);
-        JsonObject response = new JsonObject();
-        response.add("puzzleSolution", solutionJson);
-        return response.toString();
+        return solutionJson;
     }
 
-    private String createErrorJson() {
+    private JsonElement createErrorJson() {
         JsonArray errorsJson = new JsonArray();
         report.getErrors().forEach(errorsJson::add);
-        JsonObject errorsElement = new JsonObject();
-        errorsElement.add("errors", errorsJson);
-        JsonObject response = new JsonObject();
-        response.add("puzzleSolution", errorsElement);
-        return response.getAsString();
+        return errorsJson;
     }
 
 

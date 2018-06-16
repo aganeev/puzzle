@@ -21,6 +21,7 @@ class InputHandler {
     }
 
     Set<Piece> readFromJson(String jsonString) {
+        logger.debug("Parsing JSON - start");
         JsonElement json = null;
         Set<Piece> pieces = new HashSet<>();
         try {
@@ -48,7 +49,6 @@ class InputHandler {
                         piecesArray = piecesJson.getAsJsonArray();
                         Gson gson = new Gson();
                         piecesArray.forEach(jsonPiece-> pieces.add(gson.fromJson(jsonPiece,Piece.class)));
-                        logger.debug("Converting to pieces is done: {}", pieces);
                     } catch (IllegalStateException ex) {
                         String error = "Pieces object is not valid array";
                         logger.error(error);
@@ -58,6 +58,8 @@ class InputHandler {
                 }
             }
         }
+        logger.debug("Parsed pieces: {}", pieces);
+        logger.debug("Parsing JSON - stop");
         return pieces;
     }
 
