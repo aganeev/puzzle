@@ -14,7 +14,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class PuzzleMainServer {
-    private Logger logger = LogManager.getLogger(PuzzleMainServer.class.getName());
+    private static final Logger logger = LogManager.getLogger(PuzzleMainServer.class.getName());
 
 
     public static void main(String[] args) {
@@ -28,9 +28,10 @@ public class PuzzleMainServer {
             logger.info("Server is up...");
             ForkJoinPool myPool = new ForkJoinPool(numOfThreads);
             while (!listener.isClosed()) {
+                Socket socket = listener.accept();
                 myPool.execute(()-> {
                     try {
-                        handleRequest(listener.accept());
+                        handleRequest(socket);
                     } catch (IOException e) {
                         logger.error("Got an IOException during request handling: {}", e);
                     }
@@ -50,7 +51,8 @@ public class PuzzleMainServer {
         try (BufferedReader socketInput = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF8"));
         PrintStream socketOutput = new PrintStream(socket.getOutputStream(),true, "UTF8"))
         {
-            String request = getStringRequestFromSocket(socketInput);
+            String request = socketInput.readLine();
+            logger.debug(request);
             Set<Piece> pieces = inputHandler.readFromJson(request);
             if (!report.hasErrors() && !pieces.isEmpty()) {
                 PuzzleValidator puzzleValidator = new PuzzleValidator(report, pieces);
@@ -61,6 +63,8 @@ public class PuzzleMainServer {
                 }
             }
             outputHandler.reportJsonToSocket(socketOutput);
+        } finally {
+            socket.close();
         }
     }
 
@@ -75,11 +79,10 @@ public class PuzzleMainServer {
 
 
     private void solvePuzzle(Solver solver, Set<int[]> options) {
-                if (options.stream()
-                        .peek(option -> logger.debug("Current being handled option: " + Arrays.toString(option)))
-                        .noneMatch(solver::findSolution)) {
-                    solver.getReport().addErrorLine("Cannot solve puzzle: it seems that there is no proper solution");
-                }
+        options.stream()
+                .peek(option -> logger.debug("Current being handled option: " + Arrays.toString(option)))
+                .filter(solver::findSolution)
+                .findFirst();
     }
 
 }

@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import jigsaw.puzzle.entities.Report;
 
 import java.io.*;
+import java.util.List;
 
 class OutputHandler {
     private Report report;
@@ -14,7 +15,6 @@ class OutputHandler {
     }
 
     void reportToFile(String outputPath) {
-
         // In case of file writing exceptions: print usage to the user with relevant info, but not the full stack trace.
         try (OutputStream outputFile = new FileOutputStream(outputPath);
              OutputStreamWriter out = new OutputStreamWriter(outputFile);
@@ -29,6 +29,8 @@ class OutputHandler {
                     br.write(line);
                     br.newLine();
                 }
+            } else {
+                br.write("Cannot solve puzzle: it seems that there is no proper solution");
             }
         } catch (FileNotFoundException e) {
             System.err.println("Error: Output file not found");
@@ -40,11 +42,14 @@ class OutputHandler {
     }
 
     private String[] convertToLines(int[] solution) {
-        String[] returnValue = new String[(solution.length - 1) / solution[0]];
+        int numberOfRows = solution[0];
+        int numbersInRow = (solution.length - 1) / numberOfRows;
+        String[] returnValue = new String[numberOfRows];
+
         int k = 1;
-        for (int i = 0; i < returnValue.length; i++) {
+        for (int i = 0; i < numberOfRows; i++) {
             StringBuilder line = new StringBuilder();
-            for (int j = 0; j < solution[0]; j++) {
+            for (int j = 0; j < numbersInRow; j++) {
                 line.append(solution[k++]).append(" ");
             }
             returnValue[i] = line.toString();
@@ -53,13 +58,42 @@ class OutputHandler {
     }
 
     void reportJsonToSocket(PrintStream socketOutput) {
-        JsonArray errors = new JsonArray();
-        report.getErrors().forEach(errors::add);
+        String response;
+            if (report.hasErrors()) {
+                response = createErrorJson();
+            } else if (report.hasSolution()) {
+                response = createSolutionJson();
+            } else {
+                response = "{\"PuzzleSolution\": {\"SolutionExists\": false}}";
+            }
+        socketOutput.print(response);
+        socketOutput.flush();
+        socketOutput.close();
+    }
+
+    private String createSolutionJson() {
+        JsonArray solutionPiecesJson = new JsonArray();
+        int[] solution = report.getSolution();
+        for (int i = 1; i < solution.length; i++) {
+            solutionPiecesJson.add(solution[i]);
+        }
+        JsonObject solutionJson = new JsonObject();
+        solutionJson.add("solutionPieces", solutionPiecesJson);
+        solutionJson.addProperty("rows", solution[0]);
+        JsonObject response = new JsonObject();
+        response.add("puzzleSolution", solutionJson);
+        return response.toString();
+    }
+
+    private String createErrorJson() {
+        JsonArray errorsJson = new JsonArray();
+        report.getErrors().forEach(errorsJson::add);
         JsonObject errorsElement = new JsonObject();
-        errorsElement.add("errors", errors);
+        errorsElement.add("errors", errorsJson);
         JsonObject response = new JsonObject();
         response.add("puzzleSolution", errorsElement);
-        socketOutput.print(response.getAsString());
-        socketOutput.flush();
+        return response.getAsString();
     }
+
+
 }

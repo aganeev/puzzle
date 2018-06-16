@@ -1,12 +1,17 @@
 package jigsaw.puzzle.entities;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
 import java.util.Objects;
 import java.util.stream.IntStream;
 
 public class Piece {
     private int id;
+    @SerializedName("piece")
     private int[] edges;
-    private int sumOfEdges;
+    @Expose
+    private Integer sumOfEdges;
 
     private static final int LEFT = 0;
     private static final int TOP = 1;
@@ -16,7 +21,6 @@ public class Piece {
     public Piece(int id, int[] edges) {
         this.id = id;
         this.edges = edges;
-        this.sumOfEdges = IntStream.of(edges).sum();
     }
 
     public int getId() {
@@ -40,6 +44,9 @@ public class Piece {
     }
 
     public int getSumOfEdges() {
+        if (sumOfEdges == null) {
+            sumOfEdges = IntStream.of(edges).sum();
+        }
         return sumOfEdges;
     }
 

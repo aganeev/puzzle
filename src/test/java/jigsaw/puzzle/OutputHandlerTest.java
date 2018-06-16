@@ -51,8 +51,9 @@ class OutputHandlerTest {
 
     @Test
     void emptyReport(){
+        String expectedError = "Cannot solve puzzle: it seems that there is no proper solution";
         outputHandler.reportToFile(OUTPUT_FILE_PATH);
-        assertFalse(fileScanner.hasNextLine());
+        assertEquals(expectedError, fileScanner.nextLine());
         assertTrue(OUT_CONTENT.toString().isEmpty());
         assertTrue(ERR_CONTENT.toString().isEmpty());
     }
@@ -116,7 +117,7 @@ class OutputHandlerTest {
     private int[] generateRandomNumbers(int numbersInLine, int numberOfLines) {
         int numberOfIntsToGenerate = numberOfLines*numbersInLine;
         int[] retVal = new int[numberOfIntsToGenerate + 1];
-        retVal[0] = numbersInLine;
+        retVal[0] = numberOfLines;
         for (int i = 1; i <= numberOfIntsToGenerate; i++) {
             retVal[i] = ThreadLocalRandom.current().nextInt(1, 100);
         }

@@ -4,13 +4,13 @@ import java.util.Set;
 
 public class PieceSet {
 
-    Set<Piece> piece;
+    private Set<Piece> pieces;
 
-    public Set<Piece> getPiece() {
-        return piece;
+    public PieceSet(Set<Piece> pieces) {
+        this.pieces = pieces;
     }
 
-    public PieceSet(Set<Piece> piece) {
-        this.piece = piece;
+    public Set<Piece> getPieces() {
+        return pieces;
     }
 }

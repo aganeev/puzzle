@@ -14,7 +14,7 @@ import java.util.Set;
 class InputHandler {
     private Report report;
 
-    private Logger logger = LogManager.getLogger(InputHandler.class.getName());
+    private static final Logger logger = LogManager.getLogger(InputHandler.class.getName());
 
     InputHandler(Report report) {
         this.report = report;

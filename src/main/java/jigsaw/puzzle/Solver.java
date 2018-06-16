@@ -65,9 +65,9 @@ class Solver {
     }
 
     private void reportSolution() {
-        // First int is number of columns, other ints are IDs in the solution order
+        // First int is number of rows, other ints are IDs in the solution order
         int[] solution = new int[size[X]*size[Y] + 1];
-        solution[0] = size[X];
+        solution[0] = size[Y];
         int k = 1;
         for (Piece[] aBoard : board) {
             for (int j = 0; j < board[0].length; j++) {
