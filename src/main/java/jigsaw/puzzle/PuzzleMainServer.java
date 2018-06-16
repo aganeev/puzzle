@@ -112,7 +112,7 @@ public class PuzzleMainServer {
     private void handleRequest(PrintStream socketOutput, Set<Piece> pieces, Report report) {
         if (!report.hasErrors() && !pieces.isEmpty()) {
             PuzzleValidator puzzleValidator = new PuzzleValidator(report, pieces);
-            Set<int[]> options = puzzleValidator.getOptions();
+            List<int[]> options = puzzleValidator.getOptions();
             if (!report.hasErrors() && !options.isEmpty()) {
                 Solver solver = new Solver(report, pieces);
                 solvePuzzle(solver, options);
@@ -122,7 +122,7 @@ public class PuzzleMainServer {
         outputHandler.reportJsonToSocket(socketOutput);
     }
 
-    private void solvePuzzle(Solver solver, Set<int[]> options) {
+    private void solvePuzzle(Solver solver, List<int[]> options) {
         options.stream()
                 .peek(option -> logger.debug("Current being handled option: " + Arrays.toString(option)))
                 .filter(solver::findSolution)
