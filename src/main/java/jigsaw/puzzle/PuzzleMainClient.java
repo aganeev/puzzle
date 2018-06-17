@@ -1,6 +1,5 @@
 package jigsaw.puzzle;
 
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import jigsaw.puzzle.entities.Piece;
@@ -23,7 +22,7 @@ public class PuzzleMainClient {
     public static void main(String[] args) {
 
 
-        String inputPath = "src/test/resources/solvable5x5";
+        String inputPath = "src/test/resources/notSolvable6x6";
 
         Report report = new Report();
         InputHandler inputHandler = new InputHandler(report);

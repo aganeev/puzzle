@@ -50,6 +50,10 @@ public class Piece {
         return sumOfEdges;
     }
 
+    public int[] getEdges() {
+        return edges;
+    }
+
     @Override
     public String toString() {
         return String.valueOf(id);
