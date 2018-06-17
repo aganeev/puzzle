@@ -3,6 +3,7 @@ package jigsaw.puzzle.entities;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.stream.IntStream;
 
@@ -52,6 +53,10 @@ public class Piece {
 
     public int[] getEdges() {
         return edges;
+    }
+
+    public String fullPieceToString(){
+        return String.format("{%s: %s}", id, Arrays.toString(edges));
     }
 
     @Override

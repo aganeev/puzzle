@@ -22,7 +22,7 @@ public class PuzzleMainClient {
     public static void main(String[] args) {
 
 
-        String inputPath = "src/test/resources/notSolvable6x6";
+        String inputPath = "src/test/resources/notSolvable4x4";
 
         Report report = new Report();
         InputHandler inputHandler = new InputHandler(report);

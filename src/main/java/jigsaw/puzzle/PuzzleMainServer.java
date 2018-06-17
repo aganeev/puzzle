@@ -81,9 +81,9 @@ public class PuzzleMainServer {
                 Report report = new Report();
                 InputHandler inputHandler = new InputHandler(report);
                 Set<Piece> pieces = inputHandler.readFromJson(request);
-                String immediatelyResponse = String.format("{\"puzzleReceived\":{\"sessionId\":\"%s\",\"numPieces\":%s}}",sessionId,pieces.size());
-                socketOutput.println(immediatelyResponse);
-                logger.debug("Sending first response: {}", immediatelyResponse);
+                String immediateResponse = String.format("{\"puzzleReceived\":{\"sessionId\":\"%s\",\"numPieces\":%s}}",sessionId,pieces.size());
+                socketOutput.println(immediateResponse);
+                logger.debug("Sending immediate response: {}", immediateResponse);
                 socketOutput.flush();
                 myPool.execute(() -> {
                     try {

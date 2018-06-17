@@ -7,9 +7,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 class InputHandler {
     private Report report;
@@ -58,7 +57,8 @@ class InputHandler {
                 }
             }
         }
-        logger.debug("Parsed pieces: {}", pieces);
+        List piecesString = pieces.stream().map(Piece::fullPieceToString).collect(Collectors.toList());
+        logger.debug("Parsed pieces: {}", piecesString);
         logger.debug("Parsing JSON - stop");
         return pieces;
     }
