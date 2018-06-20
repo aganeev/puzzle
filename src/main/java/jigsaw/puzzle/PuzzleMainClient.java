@@ -9,6 +9,8 @@ import jigsaw.puzzle.entities.PieceSet;
 import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import com.google.gson.Gson;
@@ -19,8 +21,13 @@ import org.apache.logging.log4j.Logger;
 public class PuzzleMainClient {
     private static final Logger logger = LogManager.getLogger(PuzzleMainClient.class.getName());
 
+    private static final String PORT_PARAM_NAME = "port";
+    private static final String PORT_DEFAULT_VALUE = "7095";
+
     public static void main(String[] args) {
 
+        Map<String,String> params = parseArgs(args);
+        int port = validatePort(params.getOrDefault(PORT_PARAM_NAME,PORT_DEFAULT_VALUE));
 
         String inputPath = "src/test/resources/notSolvable4x4";
 
@@ -36,7 +43,7 @@ public class PuzzleMainClient {
             logger.debug(puzzle.toString());
 
             try ( // try with resource for all the below
-                  Socket socket = new Socket("localhost", 7095);
+                  Socket socket = new Socket("localhost", port);
                   BufferedReader socketInput = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF8"));
                   PrintStream socketOutput = new PrintStream(socket.getOutputStream(), /* autoflush */ true, "UTF8")
             ) {
@@ -57,5 +64,33 @@ public class PuzzleMainClient {
                 logger.error("IOException error...");
             }
         }
+    }
+
+    private static int validatePort(String value) {
+        String error = String.format("The port is wrong (%s), only ports in range 1024–49151 are available",value);
+        if (!value.matches("\\d+")) {
+            exitWithError(error);
+        }
+        int intValue = Integer.parseInt(value);
+        if  (intValue < 1024 || intValue > 49151) {
+            exitWithError(error);
+        }
+        return intValue;
+    }
+
+    private static Map<String,String> parseArgs(String[] args) {
+        Map<String, String> parsedArgs = new HashMap<>();
+        for (int i = 0; i < args.length; i++) {
+            String param = args[i];
+            if (param.matches("-[a-zA-Z]+")) {
+                parsedArgs.put(param.substring(1), args[++i]);
+            }
+        }
+        return parsedArgs;
+    }
+
+    private static void exitWithError(String error) {
+        logger.fatal(error);
+        System.exit(1);
     }
 }
