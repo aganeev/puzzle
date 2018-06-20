@@ -23,11 +23,14 @@ public class PuzzleMainClient {
 
     private static final String PORT_PARAM_NAME = "port";
     private static final String PORT_DEFAULT_VALUE = "7095";
+    private static final String HOST_PARAM_NAME = "host";
+    private static final String HOST_DEFAULT_VALUE = "127.0.0.1";
 
     public static void main(String[] args) {
 
         Map<String,String> params = parseArgs(args);
         int port = validatePort(params.getOrDefault(PORT_PARAM_NAME,PORT_DEFAULT_VALUE));
+        String host = validateHost(params.getOrDefault(HOST_PARAM_NAME,HOST_DEFAULT_VALUE));
 
         String inputPath = "src/test/resources/notSolvable4x4";
 
@@ -43,7 +46,7 @@ public class PuzzleMainClient {
             logger.debug(puzzle.toString());
 
             try ( // try with resource for all the below
-                  Socket socket = new Socket("localhost", port);
+                  Socket socket = new Socket(host, port);
                   BufferedReader socketInput = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF8"));
                   PrintStream socketOutput = new PrintStream(socket.getOutputStream(), /* autoflush */ true, "UTF8")
             ) {
@@ -76,6 +79,15 @@ public class PuzzleMainClient {
             exitWithError(error);
         }
         return intValue;
+    }
+
+    private static String validateHost(String value) {
+        String PATTERN = "^((0|1\\d?\\d?|2[0-4]?\\d?|25[0-5]?|[3-9]\\d?)\\.){3}(0|1\\d?\\d?|2[0-4]?\\d?|25[0-5]?|[3-9]\\d?)$";
+        String error = String.format("The host is invalid: (%s), The host ip address format should be: xxx.xxx.xxx.xxx",value);
+        if (!value.matches(PATTERN)) {
+            exitWithError(error);
+        }
+        return value;
     }
 
     private static Map<String,String> parseArgs(String[] args) {
