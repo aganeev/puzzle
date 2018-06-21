@@ -44,7 +44,7 @@ class OutputHandlerTest {
             OUTPUT_FILE.createNewFile();
         }
         fileScanner = new Scanner(OUTPUT_FILE);
-        outputHandler = new OutputHandler(report);
+        outputHandler = new OutputHandler(report, OUTPUT_FILE_PATH);
         OUT_CONTENT.reset();
         ERR_CONTENT.reset();
     }
@@ -52,7 +52,7 @@ class OutputHandlerTest {
     @Test
     void emptyReport(){
         String expectedError = "Cannot solve puzzle: it seems that there is no proper solution";
-        outputHandler.reportToFile(OUTPUT_FILE_PATH);
+        outputHandler.reportToFile();
         assertEquals(expectedError, fileScanner.nextLine());
         assertTrue(OUT_CONTENT.toString().isEmpty());
         assertTrue(ERR_CONTENT.toString().isEmpty());
@@ -61,8 +61,8 @@ class OutputHandlerTest {
     @Test
     void reportHasOneError(){
         String expectedError = "This is error line";
-        report.addErrorLine(expectedError);
-        outputHandler.reportToFile(OUTPUT_FILE_PATH);
+        report.addLine(expectedError);
+        outputHandler.reportToFile();
         assertEquals(expectedError, fileScanner.nextLine());
         assertFalse(fileScanner.hasNextLine());
         assertTrue(OUT_CONTENT.toString().isEmpty());
@@ -74,10 +74,10 @@ class OutputHandlerTest {
         String expectedError1 = "This is error line";
         String expectedError2 = "This is error line number two";
         String expectedError3 = "This is error line number three";
-        report.addErrorLine(expectedError1);
-        report.addErrorLine(expectedError2);
-        report.addErrorLine(expectedError3);
-        outputHandler.reportToFile(OUTPUT_FILE_PATH);
+        report.addLine(expectedError1);
+        report.addLine(expectedError2);
+        report.addLine(expectedError3);
+        outputHandler.reportToFile();
         assertEquals(expectedError1, fileScanner.nextLine());
         assertEquals(expectedError2, fileScanner.nextLine());
         assertEquals(expectedError3, fileScanner.nextLine());
@@ -92,7 +92,7 @@ class OutputHandlerTest {
         int numberOfLines = 3;
         int[] solution = generateRandomNumbers(numbersInLine, numberOfLines);
         report.setSolution(solution);
-        outputHandler.reportToFile(OUTPUT_FILE_PATH);
+        outputHandler.reportToFile();
         List<String> expectedStrings = new ArrayList<>();
         for (int j = 0; j < numberOfLines; j++) {
             StringBuilder string = new StringBuilder();

@@ -22,8 +22,8 @@ class InputHandlerTest {
         Report report = new Report();
         InputHandler inputHandler = new InputHandler(report);
         inputHandler.readFromFile(path);
-        assertEquals(1, report.getErrors().size());
-        assertEquals(expectedResult, report.getErrors().get(0));
+        assertEquals(1, report.getRemarks().size());
+        assertEquals(expectedResult, report.getRemarks().get(0));
     }
 
     private static Stream<Arguments> invalidInputMissingPieces() {
@@ -41,8 +41,8 @@ class InputHandlerTest {
         InputHandler inputHandler = new InputHandler(report);
         inputHandler.readFromFile(path);
         String expectedErrorMessage = "Puzzle of size 12 cannot have the following ID(s): 13";
-        assertEquals(1, report.getErrors().size());
-        assertEquals(expectedErrorMessage, report.getErrors().get(0));
+        assertEquals(1, report.getRemarks().size());
+        assertEquals(expectedErrorMessage, report.getRemarks().get(0));
     }
 
     @ParameterizedTest
@@ -54,7 +54,7 @@ class InputHandlerTest {
         Report report = new Report();
         InputHandler inputHandler = new InputHandler(report);
         inputHandler.readFromFile(path);
-        assertTrue(report.getErrors().contains(expectedResult));
+        assertTrue(report.getRemarks().contains(expectedResult));
     }
 
     private static Stream<Arguments> invalidInputWrongPieceEdges() {
@@ -72,7 +72,7 @@ class InputHandlerTest {
         Report report = new Report();
         InputHandler inputHandler = new InputHandler(report);
         inputHandler.readFromFile(path);
-        assertTrue(report.getErrors().contains("Error::File Not Found"));
+        assertTrue(report.getRemarks().contains("Error::File Not Found"));
     }
 
 
@@ -85,7 +85,7 @@ class InputHandlerTest {
         String PATH = "src/test/resources/";
         String path = PATH + fileInput;
         Report report = new Report();
-        assertTrue(report.getErrors().contains("Cannot solve puzzle"));
+        assertTrue(report.getRemarks().contains("Cannot solve puzzle"));
     }
 
     /*****************************************************************

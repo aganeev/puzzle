@@ -32,7 +32,7 @@ public class PuzzleMainClient {
         int port = validatePort(params.getOrDefault(PORT_PARAM_NAME,PORT_DEFAULT_VALUE));
         String host = validateHost(params.getOrDefault(HOST_PARAM_NAME,HOST_DEFAULT_VALUE));
 
-        String inputPath = "src/test/resources/notSolvable4x4";
+        String inputPath = params.get("input");
 
         Report report = new Report();
         InputHandler inputHandler = new InputHandler(report);
@@ -56,6 +56,11 @@ public class PuzzleMainClient {
                 socketOutput.println(puzzle.toString());
                 while ((response = socketInput.readLine()) != null) {
                     logger.info(response);
+                    if (response.contains("puzzleSolution")) {
+                        report.addLine(response);
+                    }
+
+
                 }
 
 
@@ -67,6 +72,9 @@ public class PuzzleMainClient {
                 logger.error("IOException error...");
             }
         }
+
+        String outputPath = params.get("input") != null? params.get("input") : "/src/test/resources/output.txt";
+        OutputHandler outputHandler = new OutputHandler(report, outputPath);
     }
 
     private static int validatePort(String value) {

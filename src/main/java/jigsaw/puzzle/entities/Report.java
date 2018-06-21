@@ -4,19 +4,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Report {
-    private List<String> errors;
+    private List<String> remarks;
     private int[] solution = new int[0];
 
     public Report() {
-        this.errors = new ArrayList<>();
+        this.remarks = new ArrayList<>();
     }
 
-    public void addErrorLine(String line) {
-        errors.add(line);
+    public void addLine(String line) {
+        remarks.add(line);
     }
 
     public boolean hasErrors(){
-        return !errors.isEmpty();
+        return !remarks.isEmpty();
     }
 
     public boolean hasSolution(){
@@ -27,8 +27,8 @@ public class Report {
         this.solution = solution;
     }
 
-    public List<String> getErrors() {
-        return errors;
+    public List<String> getRemarks() {
+        return remarks;
     }
 
     public int[] getSolution() {

@@ -11,20 +11,22 @@ import java.io.*;
 
 class OutputHandler {
     private Report report;
+    private String outputPath;
 
     private static final Logger logger = LogManager.getLogger(OutputHandler.class.getName());
 
-    OutputHandler(Report report) {
+    OutputHandler(Report report, String outputPath) {
         this.report = report;
+        this.outputPath = outputPath;
     }
 
-    void reportToFile(String outputPath) {
+    void reportToFile() {
         // In case of file writing exceptions: print usage to the user with relevant info, but not the full stack trace.
         try (OutputStream outputFile = new FileOutputStream(outputPath);
              OutputStreamWriter out = new OutputStreamWriter(outputFile);
              BufferedWriter br = new BufferedWriter(out)) {
             if (report.hasErrors()) {
-                for (String error : report.getErrors()) {
+                for (String error : report.getRemarks()) {
                     br.write(error);
                     br.newLine();
                 }
@@ -93,7 +95,7 @@ class OutputHandler {
 
     private JsonElement createErrorJson() {
         JsonArray errorsJson = new JsonArray();
-        report.getErrors().forEach(errorsJson::add);
+        report.getRemarks().forEach(errorsJson::add);
         return errorsJson;
     }
 

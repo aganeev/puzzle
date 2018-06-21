@@ -28,20 +28,20 @@ class InputHandler {
         } catch (JsonParseException jEx) {
             String error = "Received request is not a valid JSON";
             logger.error(error);
-            report.addErrorLine(error);
+            report.addLine(error);
         }
         if (json != null) {
             JsonElement puzzle = json.getAsJsonObject().get("puzzle");
             if (puzzle == null) {
                 String error = "json haven't puzzle object";
                 logger.error(error);
-                report.addErrorLine(error);
+                report.addLine(error);
             } else {
                 JsonElement piecesJson = puzzle.getAsJsonObject().get("pieces");
                 if (piecesJson == null) {
                     String error = "json haven't pieces object";
                     logger.error(error);
-                    report.addErrorLine(error);
+                    report.addLine(error);
                 } else {
                     JsonArray piecesArray;
                     try {
@@ -51,7 +51,7 @@ class InputHandler {
                     } catch (IllegalStateException ex) {
                         String error = "Pieces object is not valid array";
                         logger.error(error);
-                        report.addErrorLine(error);
+                        report.addLine(error);
                     }
 
                 }
@@ -127,12 +127,12 @@ class InputHandler {
                 ++actualLineCounter;
             }
         } catch (UnsupportedEncodingException e) {
-            report.addErrorLine("Error::Unsupported Encoding Exception");
+            report.addLine("Error::Unsupported Encoding Exception");
         } catch (FileNotFoundException e) {
-            report.addErrorLine("Error::File Not Found");
+            report.addLine("Error::File Not Found");
             System.out.println("Error::File Not Found");
         } catch (IOException e) {
-            report.addErrorLine("Error:IOException");
+            report.addLine("Error:IOException");
         }
 
         // creating the report for the elements that aren't on the list
@@ -166,7 +166,7 @@ class InputHandler {
         int msgSize = missingElementsMsg.length() - 1;
         if (missingElementsMsg.length() > 0) {
             missingElementsMsg = missingElementsMsg.substring(0, msgSize);
-            report.addErrorLine("Missing puzzle element(s) with the following IDs: " + missingElementsMsg);
+            report.addLine("Missing puzzle element(s) with the following IDs: " + missingElementsMsg);
             System.out.println("Missing puzzle element(s) with the following IDs: " + missingElementsMsg);
         }
     }
@@ -193,7 +193,7 @@ class InputHandler {
         if (!wrongElementsMsg.isEmpty()) {
             int msgSize = wrongElementsMsg.length() - 1;
             wrongElementsMsg = wrongElementsMsg.substring(0, msgSize);
-            report.addErrorLine("Puzzle of size " +  puzzleSize + " cannot have the following ID(s): " + wrongElementsMsg);
+            report.addLine("Puzzle of size " +  puzzleSize + " cannot have the following ID(s): " + wrongElementsMsg);
             System.out.println("Puzzle of size " +  puzzleSize + " cannot have the following ID(s): " + wrongElementsMsg);
         }
     }
@@ -202,7 +202,7 @@ class InputHandler {
         // creating arraylist of wrongElementsFormat error messages
         if (!wrongElementsFormat.isEmpty()) {
             for (String msg: wrongElementsFormat) {
-                report.addErrorLine("Puzzle ID " + msg.charAt(0) + " has wrong data: " + msg);
+                report.addLine("Puzzle ID " + msg.charAt(0) + " has wrong data: " + msg);
                 System.out.println(("Puzzle ID " + msg.charAt(0) + " has wrong data: " + msg));
             }
         }

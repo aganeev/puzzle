@@ -245,7 +245,7 @@ class PuzzleValidatorTest {
         assertAll(
                 () -> assertTrue(actualOptions.isEmpty(), "not expected, but received options:" +
                         actualOptions.stream().map(Arrays::toString).collect(Collectors.joining("  "))),
-                () -> assertEquals(expectedErrors, report.getErrors())
+                () -> assertEquals(expectedErrors, report.getRemarks())
         );
     }
 
