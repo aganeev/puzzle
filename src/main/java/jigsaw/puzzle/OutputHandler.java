@@ -93,13 +93,17 @@ class OutputHandler {
 
     private JsonElement createErrorJson() {
         JsonArray errorsJson = new JsonArray();
-        report.getErrors().forEach(errorsJson::add);
+        report.getErrors().forEach(error->{
+            logger.error(error);
+            errorsJson.add(error);
+        });
         return errorsJson;
     }
 
 
     void validateOutputFilePath(String outputPath) {
         File file = new File(outputPath);
+        file = file.getAbsoluteFile();
         if (file.isDirectory()) {
             logger.error("Value should be a file and not a directory.");
             System.exit(1);

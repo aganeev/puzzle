@@ -84,7 +84,7 @@ public class PuzzleMainClient {
             } catch (UnknownHostException e) {
                 logger.error("Unknown problem occurred...");
             } catch (IOException e) {
-                logger.error("IOException error...");
+                logger.error("Connection was closed");
             }
         }
         outputHandler.reportToFile(outputPath);

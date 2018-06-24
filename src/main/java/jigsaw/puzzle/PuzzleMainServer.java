@@ -4,6 +4,7 @@ import jigsaw.puzzle.entities.Piece;
 import jigsaw.puzzle.entities.Report;
 
 import java.io.*;
+import java.net.BindException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.*;
@@ -103,6 +104,8 @@ public class PuzzleMainServer {
                 ThreadContext.pop();
             }
 
+        } catch (BindException bindException) {
+            logger.error("Port is already used: {}", port);
         } catch (IOException e) {
             logger.error("Got an IOException: {}", e);
         }
