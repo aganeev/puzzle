@@ -52,13 +52,13 @@ class PuzzleValidator {
         impossibleOptions.addAll(findImpossibleRegularCases(options));
         options.removeAll(impossibleOptions);
         if (options.isEmpty()) {
-            report.addLine("Cannot solve puzzle: wrong number of straight edges");
+            report.addErrorLine("Cannot solve puzzle: wrong number of straight edges");
         }
         if (!isCornerCheckPassed()){
             options.clear();
         }
         if(!isEdgesSumCheckPassed()){
-            report.addLine("Cannot solve puzzle: sum of edges is not zero");
+            report.addErrorLine("Cannot solve puzzle: sum of edges is not zero");
             options.clear();
         }
         return options;
@@ -72,19 +72,19 @@ class PuzzleValidator {
     private boolean isCornerCheckPassed() {
         boolean isCheckPassed = true;
         if (pieces.stream().noneMatch(piece -> piece.getLeft() == 0 && piece.getTop() == 0)) {
-            report.addLine("Cannot solve puzzle: missing corner element: TL");
+            report.addErrorLine("Cannot solve puzzle: missing corner element: TL");
             isCheckPassed = false;
         }
         if (pieces.stream().noneMatch(piece -> piece.getTop() == 0 && piece.getRight() == 0)) {
-            report.addLine("Cannot solve puzzle: missing corner element: TR");
+            report.addErrorLine("Cannot solve puzzle: missing corner element: TR");
             isCheckPassed = false;
         }
         if (pieces.stream().noneMatch(piece -> piece.getRight() == 0 && piece.getBottom() == 0)) {
-            report.addLine("Cannot solve puzzle: missing corner element: BR");
+            report.addErrorLine("Cannot solve puzzle: missing corner element: BR");
             isCheckPassed = false;
         }
         if (pieces.stream().noneMatch(piece -> piece.getBottom() == 0 && piece.getLeft() == 0)) {
-            report.addLine("Cannot solve puzzle: missing corner element: BL");
+            report.addErrorLine("Cannot solve puzzle: missing corner element: BL");
             isCheckPassed = false;
         }
         return isCheckPassed;

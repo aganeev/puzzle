@@ -26,9 +26,8 @@ public class PuzzleMainServer {
         Map<String,String> params = parseArgs(args);
         int numOfThreads = validateNumOfThreads(params.getOrDefault(THREADS_PARAM_NAME,THREADS_DEFAULT_VALUE));
         int port = validatePort(params.getOrDefault(PORT_PARAM_NAME,PORT_DEFAULT_VALUE));
-        String outputPath = params.get("input") != null? params.get("input") : "/src/test/resources/output.txt";
         PuzzleMainServer puzzleMainServer = new PuzzleMainServer();
-        puzzleMainServer.start(numOfThreads, port, outputPath);
+        puzzleMainServer.start(numOfThreads, port);
 
 
     }
@@ -68,7 +67,7 @@ public class PuzzleMainServer {
         return parsedArgs;
     }
 
-    private void start(int numOfThreads, int port, String outputPath) {
+    private void start(int numOfThreads, int port) {
         try (ServerSocket listener = new ServerSocket(port)) {
             logger.info("Server is up on port={} and number of threads={}.",port,numOfThreads);
             ForkJoinPool myPool = new ForkJoinPool(numOfThreads);
@@ -83,7 +82,7 @@ public class PuzzleMainServer {
                 logger.debug("Received request: {}", request);
                 Report report = new Report();
                 InputHandler inputHandler = new InputHandler(report);
-                Set<Piece> pieces = inputHandler.readFromJson(request);
+                Set<Piece> pieces = inputHandler.readPiecesFromJson(request);
                 String immediateResponse = String.format("{\"puzzleReceived\":{\"sessionId\":\"%s\",\"numPieces\":%s}}",sessionId,pieces.size());
                 socketOutput.println(immediateResponse);
                 logger.debug("Sending immediate response: {}", immediateResponse);
@@ -91,7 +90,7 @@ public class PuzzleMainServer {
                 myPool.execute(() -> {
                     try {
                         ThreadContext.push(sessionId);
-                        handleRequest(socketOutput, pieces, report, outputPath);
+                        handleRequest(socketOutput, pieces, report);
                         socketInput.close();
                         socketOutput.close();
                         socket.close();
@@ -112,7 +111,7 @@ public class PuzzleMainServer {
     }
 
 
-    private void handleRequest(PrintStream socketOutput, Set<Piece> pieces, Report report, String outputPath) {
+    private void handleRequest(PrintStream socketOutput, Set<Piece> pieces, Report report) {
         if (!report.hasErrors() && !pieces.isEmpty()) {
             PuzzleValidator puzzleValidator = new PuzzleValidator(report, pieces);
             List<int[]> options = puzzleValidator.getOptions();
@@ -121,7 +120,7 @@ public class PuzzleMainServer {
                 solvePuzzle(solver, options);
             }
         }
-        OutputHandler outputHandler = new OutputHandler(report, outputPath);
+        OutputHandler outputHandler = new OutputHandler(report);
         outputHandler.reportJsonToSocket(socketOutput);
     }
 

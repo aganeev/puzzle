@@ -2,6 +2,7 @@ package jigsaw.puzzle;
 
 import com.google.gson.*;
 import jigsaw.puzzle.entities.Piece;
+import jigsaw.puzzle.entities.PuzzleSolution;
 import jigsaw.puzzle.entities.Report;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -19,7 +20,38 @@ class InputHandler {
         this.report = report;
     }
 
-    Set<Piece> readFromJson(String jsonString) {
+    void readSolutionFromJson(String jsonString) {
+        logger.debug("Parsing JSON - start");
+        JsonElement json = null;
+        try {
+            json = new JsonParser().parse(jsonString);
+        } catch (JsonParseException jEx) {
+            String error = "Received response is not a valid JSON";
+            logger.error(error);
+            report.addErrorLine(error);
+        }
+        if (json != null) {
+            Gson gson = new Gson();
+            try {
+                PuzzleSolution puzzleSolution = gson.fromJson(json.getAsJsonObject().get("puzzleSolution"), PuzzleSolution.class);
+                if (puzzleSolution.isSolutionExists()) {
+                    report.setSolution(puzzleSolution.getSolution().toArray());
+                } else {
+                    String[] errors = puzzleSolution.getErrors();
+                    if (errors != null && errors.length > 0) {
+                        for (String error : errors) {
+                            report.addErrorLine(error);
+                        }
+                    }
+                }
+            } catch (JsonSyntaxException e) {
+                logger.error("Invalid json response: {}", e);
+            }
+        }
+        logger.debug("Parsing JSON - stop");
+    }
+
+    Set<Piece> readPiecesFromJson(String jsonString) {
         logger.debug("Parsing JSON - start");
         JsonElement json = null;
         Set<Piece> pieces = new HashSet<>();
@@ -28,20 +60,20 @@ class InputHandler {
         } catch (JsonParseException jEx) {
             String error = "Received request is not a valid JSON";
             logger.error(error);
-            report.addLine(error);
+            report.addErrorLine(error);
         }
         if (json != null) {
             JsonElement puzzle = json.getAsJsonObject().get("puzzle");
             if (puzzle == null) {
-                String error = "json haven't puzzle object";
+                String error = "request haven't puzzle object";
                 logger.error(error);
-                report.addLine(error);
+                report.addErrorLine(error);
             } else {
                 JsonElement piecesJson = puzzle.getAsJsonObject().get("pieces");
                 if (piecesJson == null) {
-                    String error = "json haven't pieces object";
+                    String error = "request haven't pieces object";
                     logger.error(error);
-                    report.addLine(error);
+                    report.addErrorLine(error);
                 } else {
                     JsonArray piecesArray;
                     try {
@@ -51,7 +83,7 @@ class InputHandler {
                     } catch (IllegalStateException ex) {
                         String error = "Pieces object is not valid array";
                         logger.error(error);
-                        report.addLine(error);
+                        report.addErrorLine(error);
                     }
 
                 }
@@ -127,12 +159,12 @@ class InputHandler {
                 ++actualLineCounter;
             }
         } catch (UnsupportedEncodingException e) {
-            report.addLine("Error::Unsupported Encoding Exception");
+            report.addErrorLine("Error::Unsupported Encoding Exception");
         } catch (FileNotFoundException e) {
-            report.addLine("Error::File Not Found");
+            report.addErrorLine("Error::File Not Found");
             System.out.println("Error::File Not Found");
         } catch (IOException e) {
-            report.addLine("Error:IOException");
+            report.addErrorLine("Error:IOException");
         }
 
         // creating the report for the elements that aren't on the list
@@ -166,7 +198,7 @@ class InputHandler {
         int msgSize = missingElementsMsg.length() - 1;
         if (missingElementsMsg.length() > 0) {
             missingElementsMsg = missingElementsMsg.substring(0, msgSize);
-            report.addLine("Missing puzzle element(s) with the following IDs: " + missingElementsMsg);
+            report.addErrorLine("Missing puzzle element(s) with the following IDs: " + missingElementsMsg);
             System.out.println("Missing puzzle element(s) with the following IDs: " + missingElementsMsg);
         }
     }
@@ -193,7 +225,7 @@ class InputHandler {
         if (!wrongElementsMsg.isEmpty()) {
             int msgSize = wrongElementsMsg.length() - 1;
             wrongElementsMsg = wrongElementsMsg.substring(0, msgSize);
-            report.addLine("Puzzle of size " +  puzzleSize + " cannot have the following ID(s): " + wrongElementsMsg);
+            report.addErrorLine("Puzzle of size " +  puzzleSize + " cannot have the following ID(s): " + wrongElementsMsg);
             System.out.println("Puzzle of size " +  puzzleSize + " cannot have the following ID(s): " + wrongElementsMsg);
         }
     }
@@ -202,7 +234,7 @@ class InputHandler {
         // creating arraylist of wrongElementsFormat error messages
         if (!wrongElementsFormat.isEmpty()) {
             for (String msg: wrongElementsFormat) {
-                report.addLine("Puzzle ID " + msg.charAt(0) + " has wrong data: " + msg);
+                report.addErrorLine("Puzzle ID " + msg.charAt(0) + " has wrong data: " + msg);
                 System.out.println(("Puzzle ID " + msg.charAt(0) + " has wrong data: " + msg));
             }
         }

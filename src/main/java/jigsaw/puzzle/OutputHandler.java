@@ -11,22 +11,20 @@ import java.io.*;
 
 class OutputHandler {
     private Report report;
-    private String outputPath;
 
     private static final Logger logger = LogManager.getLogger(OutputHandler.class.getName());
 
-    OutputHandler(Report report, String outputPath) {
+    OutputHandler(Report report) {
         this.report = report;
-        this.outputPath = outputPath;
     }
 
-    void reportToFile() {
+    void reportToFile(String outputPath) {
         // In case of file writing exceptions: print usage to the user with relevant info, but not the full stack trace.
         try (OutputStream outputFile = new FileOutputStream(outputPath);
              OutputStreamWriter out = new OutputStreamWriter(outputFile);
              BufferedWriter br = new BufferedWriter(out)) {
             if (report.hasErrors()) {
-                for (String error : report.getRemarks()) {
+                for (String error : report.getErrors()) {
                     br.write(error);
                     br.newLine();
                 }
@@ -72,7 +70,7 @@ class OutputHandler {
             isSolutionExist = true;
             puzzleSolution.add("solution", createSolutionJson());
         }
-        puzzleSolution.addProperty("solutionExist",isSolutionExist);
+        puzzleSolution.addProperty("solutionExists",isSolutionExist);
         JsonObject response = new JsonObject();
         response.add("puzzleSolution", puzzleSolution);
         logger.debug("Sending final response: {}", response);
@@ -95,9 +93,21 @@ class OutputHandler {
 
     private JsonElement createErrorJson() {
         JsonArray errorsJson = new JsonArray();
-        report.getRemarks().forEach(errorsJson::add);
+        report.getErrors().forEach(errorsJson::add);
         return errorsJson;
     }
 
 
+    void validateOutputFilePath(String outputPath) {
+        File file = new File(outputPath);
+        if (file.isDirectory()) {
+            logger.error("Value should be a file and not a directory.");
+            System.exit(1);
+        }
+        file = file.getParentFile();
+        if (!file.exists()){
+            logger.error("Given directory doesn't exist");
+            System.exit(1);
+        }
+    }
 }

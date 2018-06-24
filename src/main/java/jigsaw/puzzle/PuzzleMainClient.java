@@ -25,17 +25,35 @@ public class PuzzleMainClient {
     private static final String PORT_DEFAULT_VALUE = "7095";
     private static final String HOST_PARAM_NAME = "host";
     private static final String HOST_DEFAULT_VALUE = "127.0.0.1";
+    private static final String INPUT_PARAM_NAME = "input";
+    private static final String OUTPUT_PARAM_NAME = "output";
+
+
 
     public static void main(String[] args) {
-
         Map<String,String> params = parseArgs(args);
         int port = validatePort(params.getOrDefault(PORT_PARAM_NAME,PORT_DEFAULT_VALUE));
         String host = validateHost(params.getOrDefault(HOST_PARAM_NAME,HOST_DEFAULT_VALUE));
+        String inputPath = validateNotNull(params.get(INPUT_PARAM_NAME), INPUT_PARAM_NAME);
+        String outputPath = validateNotNull(params.get(OUTPUT_PARAM_NAME), OUTPUT_PARAM_NAME);
 
-        String inputPath = params.get("input");
+        PuzzleMainClient puzzleMainClient = new PuzzleMainClient();
+        puzzleMainClient.start(host, port, inputPath, outputPath);
+    }
 
+    private static String validateNotNull(String value, String name) {
+        if (value == null) {
+            logger.error(name + " cannot be null. Exiting...");
+            System.exit(1);
+        }
+        return value;
+    }
+
+    private void start(String host, int port, String inputPath, String outputPath) {
         Report report = new Report();
         InputHandler inputHandler = new InputHandler(report);
+        OutputHandler outputHandler = new OutputHandler(report);
+        outputHandler.validateOutputFilePath(outputPath);
         Set<Piece> pieces = inputHandler.readFromFile(inputPath);
         if (!report.hasErrors() && !pieces.isEmpty()) {
             PieceSet pieceSet = new PieceSet(pieces);
@@ -48,34 +66,32 @@ public class PuzzleMainClient {
             try ( // try with resource for all the below
                   Socket socket = new Socket(host, port);
                   BufferedReader socketInput = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF8"));
-                  PrintStream socketOutput = new PrintStream(socket.getOutputStream(), /* autoflush */ true, "UTF8")
+                  PrintStream socketOutput = new PrintStream(socket.getOutputStream(),true, "UTF8")
             ) {
 
                 String response;
-                logger.info("Sending JSON to server...");
+                logger.debug("Sending JSON to server...");
                 socketOutput.println(puzzle.toString());
                 while ((response = socketInput.readLine()) != null) {
                     logger.info(response);
                     if (response.contains("puzzleSolution")) {
-                        report.addLine(response);
+                        inputHandler.readSolutionFromJson(response);
                     }
-
-
                 }
-
 
             } catch (UnsupportedEncodingException e) {
                 logger.error("Wrong encoding problem...");
             } catch (UnknownHostException e) {
-                logger.error("Unknown problem occured...");
+                logger.error("Unknown problem occurred...");
             } catch (IOException e) {
                 logger.error("IOException error...");
             }
         }
+        outputHandler.reportToFile(outputPath);
 
-        String outputPath = params.get("input") != null? params.get("input") : "/src/test/resources/output.txt";
-        OutputHandler outputHandler = new OutputHandler(report, outputPath);
+
     }
+
 
     private static int validatePort(String value) {
         String error = String.format("The port is wrong (%s), only ports in range 1024–49151 are available",value);
@@ -90,9 +106,9 @@ public class PuzzleMainClient {
     }
 
     private static String validateHost(String value) {
-        String PATTERN = "^((0|1\\d?\\d?|2[0-4]?\\d?|25[0-5]?|[3-9]\\d?)\\.){3}(0|1\\d?\\d?|2[0-4]?\\d?|25[0-5]?|[3-9]\\d?)$";
+        String pattern = "^((0|1\\d?\\d?|2[0-4]?\\d?|25[0-5]?|[3-9]\\d?)\\.){3}(0|1\\d?\\d?|2[0-4]?\\d?|25[0-5]?|[3-9]\\d?)$";
         String error = String.format("The host is invalid: (%s), The host ip address format should be: xxx.xxx.xxx.xxx",value);
-        if (!value.matches(PATTERN)) {
+        if (!value.matches(pattern)) {
             exitWithError(error);
         }
         return value;
